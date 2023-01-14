@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
+	"regexp"
 )
 
 func main() {
@@ -18,7 +18,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	filepath.Walk(*inputDir, func(path string, info os.FileInfo, err error) error {
+	r, _ := regexp.Compile(`\s?[\/]?[\/|#] UNGEN: (.*)\s?$`)
+
+	filepath.Walk(*inputDir, func(path string, info os.FileInfo, e error) error {
 		// Skip directories (since they will be scanned recursively)
 		if info.IsDir() {
 			return nil
@@ -35,9 +37,12 @@ func main() {
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			line := scanner.Text()
-			// Check if the line starts with "//" or "#"
-			if strings.HasPrefix(line, "// UNGEN: ") || strings.HasPrefix(line, "# UNGEN: ") {
-				fmt.Println(line)
+
+			if r.MatchString(line) {
+				// Process Line
+				// Extract the line after the prefix
+				cmd := r.FindStringSubmatch(line)
+				fmt.Println(cmd[1])
 			}
 		}
 

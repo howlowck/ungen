@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-// UNGEN: replace "World" with $app
+// UNGEN: "World" -> $appName
 app.get('/', (req, res) => res.send('Hello World!'));
 
 // start the Express server
