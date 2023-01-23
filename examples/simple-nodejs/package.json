@@ -1,9 +1,9 @@
 {
-  // UNGEN: "simple-nodejs" -> $appName
+  // UNGEN: Replace "simple-nodejs" with $appName
   "name": "simple-nodejs",
   "version": "1.0.0",
   "description": "",
-  // UNGEN: if ( $useTypescript ) { ".js" -> ".ts" }
+  // UNGEN: IF $useTypescript THEN Replace ".js" with ".ts" 
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
