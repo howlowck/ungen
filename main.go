@@ -17,7 +17,9 @@ func main() {
 	flag.Parse()
 
 	if *testFlag {
-		prog, _ := Parse(`// UNGEN: replace "World" with var.app_name`)
+		// prog, _ := Parse(`// UNGEN: replace "World" with var.app_name`)
+		// prog, _ := Parse(`// UNGEN: delete 3 lines`)
+		prog, _ := Parse(`// UNGEN: if var.app_name then delete 3 lines`)
 		repr.Println(prog)
 		os.Exit(0)
 	}

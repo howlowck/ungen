@@ -15,23 +15,27 @@ type Program struct {
 type Command struct {
 	Header *Header `@@`
 
-	Operation *Operation ` @@`
+	IfConditional *If `( @@`
+	Operation *Operation ` | @@ )`
 }
 
 type Header struct {
 	HeaderText string `@HEADER`
 }
 
-// type If struct {
-// 	Pos lexer.Position
+type If struct {
+	Condition *Expr     `"IF" @@`
+	Then *Operation `"THEN" @@`
+	Else *Operation `("ELSE" @@)?`
+}
 
-// 	Condition *Value     `"IF" @@`
-// 	Operation *Operation `"THEN" @@`
-// }
+type Expr struct {
+	Value *Value `@@`
+}
 
 type Operation struct {
-	Replace *Replace `@@`
-	// Delete  *Delete  `@@`
+	Replace *Replace `( @@`
+	Delete  *Delete  ` | @@ )`
 }
 
 type Replace struct {
@@ -40,7 +44,7 @@ type Replace struct {
 }
 
 type Delete struct {
-	NumOfLines *int `"delete" @Int "lines"`
+	NumOfLines int `"delete" @INT "lines"`
 }
 
 type Value struct {
@@ -70,7 +74,7 @@ var (
 		{"STR", `'[^']*'|"[^"]*"`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
-		{"KEYWORD", `(?i)\b(if|replace|with|delete|lines)\b`},
+		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines)\b`},
 		{"VAR", `var\.\w+`},
 		{"EOL", `[\n\r]+`},
 	})

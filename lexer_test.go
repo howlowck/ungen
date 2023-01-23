@@ -9,9 +9,12 @@ import (
 
 func TestLexer(t *testing.T) {
 	prog1, err := Parse(`// UNGEN: replace "World" with var.app_name`)
-	require.NoError(t, err)
 	repr.Println(prog1)
-	prog2, err := Parse(`// UNGEN: delete 3 lines`)
 	require.NoError(t, err)
+	prog2, err := Parse(`// UNGEN: delete 3 lines`)
 	repr.Println(prog2)
+	require.NoError(t, err)
+	prog3, err := Parse(`// UNGEN: if var.app_name then delete 3 lines`)
+	repr.Println(prog3)
+	require.NoError(t, err)
 }
