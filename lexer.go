@@ -15,8 +15,8 @@ type Program struct {
 type Command struct {
 	Header *Header `@@`
 
-	IfConditional *If `( @@`
-	Operation *Operation ` | @@ )`
+	IfConditional *If        `( @@`
+	Operation     *Operation ` | @@ )`
 }
 
 type Header struct {
@@ -24,9 +24,9 @@ type Header struct {
 }
 
 type If struct {
-	Condition *Expr     `"IF" @@`
-	Then *Operation `"THEN" @@`
-	Else *Operation `("ELSE" @@)?`
+	Condition *Expr      `"IF" @@`
+	Then      *Operation `"THEN" @@`
+	Else      *Operation `("ELSE" @@)?`
 }
 
 type Expr struct {
@@ -48,8 +48,8 @@ type Delete struct {
 }
 
 type Value struct {
-	String   string `( @STR`
-	Variable string `  | @VAR )`
+	String   *string `( @STR`
+	Variable *string `  | @VAR )`
 }
 
 func Parse(code string) (*Program, error) {
