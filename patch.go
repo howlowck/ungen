@@ -1,10 +1,43 @@
 package main
 
+type PatchType int
+
+const (
+	PatchReplace = iota
+	PatchDelete
+	PatchInsert
+)
+
+func (t PatchType) String() string {
+	return [...]string{"PatchReplace", "PatchDelete", "PatchInsert", "FileCreate", "FileDelete"}[t]
+}
+
+type FileOp int
+
+const (
+	FileCreate = iota
+	FileDelete
+)
+
+func (t FileOp) String() string {
+	return [...]string{"FileCreate", "FileDelete"}[t]
+}
+
 type ContentPatch struct {
 	PatchType     PatchType
 	OldLineNumber int
 	OldLineCount  int
 	NewContent    []string
+}
+
+type Patch struct {
+	Content *ContentPatch
+	File    *FilePatch
+}
+
+type FilePatch struct {
+	FileOp   FileOp
+	FilePath string
 }
 
 func (p *ContentPatch) Apply(lines []string) []string {

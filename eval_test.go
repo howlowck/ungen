@@ -32,11 +32,13 @@ DEBUG=true
 	prog1, _ := Parse(`// UNGEN: replace "world" with "test"`)
 
 	patch1 := prog1.Evaluate(lines, vars, 2)
-	expected1 := []ContentPatch{{
-		PatchType:     PatchReplace,
-		OldLineNumber: 3,
-		OldLineCount:  1,
-		NewContent:    []string{"APP_NAME=hello-test"},
+	expected1 := []Patch{{
+		Content: &ContentPatch{
+			PatchType:     PatchReplace,
+			OldLineNumber: 3,
+			OldLineCount:  1,
+			NewContent:    []string{"APP_NAME=hello-test"},
+		},
 	}}
 
 	eq1 := reflect.DeepEqual(patch1, expected1)
@@ -46,11 +48,13 @@ DEBUG=true
 
 	prog2, _ := Parse(`// UNGEN: replace "3000" with var.app_port`)
 	patch2 := prog2.Evaluate(lines, vars, 5)
-	expected2 := []ContentPatch{{
-		PatchType:     PatchReplace,
-		OldLineNumber: 6,
-		OldLineCount:  1,
-		NewContent:    []string{"APP_PORT=8000"},
+	expected2 := []Patch{{
+		Content: &ContentPatch{
+			PatchType:     PatchReplace,
+			OldLineNumber: 6,
+			OldLineCount:  1,
+			NewContent:    []string{"APP_PORT=8000"},
+		},
 	}}
 
 	eq2 := reflect.DeepEqual(patch2, expected2)
@@ -60,11 +64,13 @@ DEBUG=true
 
 	prog3, _ := Parse(`// UNGEN: delete 2 lines`)
 	patch3 := prog3.Evaluate(lines, vars, 8)
-	expected3 := []ContentPatch{{
-		PatchType:     PatchDelete,
-		OldLineNumber: 9,
-		OldLineCount:  2,
-		NewContent:    []string{},
+	expected3 := []Patch{{
+		Content: &ContentPatch{
+			PatchType:     PatchDelete,
+			OldLineNumber: 9,
+			OldLineCount:  2,
+			NewContent:    []string{},
+		},
 	}}
 
 	eq3 := reflect.DeepEqual(patch3, expected3)
