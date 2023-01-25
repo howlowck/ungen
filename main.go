@@ -37,6 +37,9 @@ func main() {
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			line := scanner.Text()
+			// apply all ContentPatch changes
+			// run file delete operations
+			// run directory delete operations
 
 			if r.MatchString(line) {
 				// Process Line
