@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -18,70 +17,55 @@ func (t PatchType) String() string {
 	return [...]string{"Replace", "Delete", "Insert"}[t]
 }
 
-type Patch struct {
-	PatchType     PatchType
-	OldLineNumber int
-	OldLineCount  int
-	NewContent    string
-}
+// TODO: figure out how to do file or directory deletions
+func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNumber int) []ContentPatch {
 
-func Eval(fileText string, vars map[string]string, p *Program, programLineNumber int) []Patch {
-	// get all args
-	lines := regexp.MustCompile("\r?\n").Split(fileText, -1)
+	var result []ContentPatch
 
-	// get old Line Number and Range
-	oldLineNumber := programLineNumber + 1 // the next line
-	oldLineCount := 1                      // default to 1
-
-	// create patch from program
-
-	oldContent := strings.Join(lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
-	fmt.Println(oldContent)
-	patch := Patch{
-		PatchType:     PatchDelete,
-		OldLineNumber: oldLineNumber,
-		OldLineCount:  oldLineCount,
-		NewContent:    "",
-	}
-	return []Patch{patch}
-}
-
-func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNumber int) []Patch {
-
-	// get old Line Number and Range
-
-	var result Patch
 	for _, c := range p.Commands {
 
 		if c.Operation != nil {
 			if c.Operation.Replace != nil {
 				replaceFrom := c.Operation.Replace.From.String
 
-				var replaceTo *string
+				var replaceTo string
 				if c.Operation.Replace.To.String != nil {
-					replaceTo = c.Operation.Replace.To.String
+					replaceTo = *(c.Operation.Replace.To.String)
 				} else {
-					// TODO evaluate variable
 					varTemp := *c.Operation.Replace.To.Variable
-					varName := varTemp[4:]
-					varValue := vars[varName]
-					replaceTo = &varValue
+					varName := varTemp[4:] // take away 'var.'
+					replaceTo = vars[varName]
 				}
 				oldLineNumber := programLineNumber + 1 // the next line
 				oldLineCount := 1                      // default to 1
 
 				oldContent := strings.Join(lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
 				re := regexp.MustCompile(*replaceFrom)
-				newContent := re.ReplaceAllString(oldContent, *replaceTo)
-				result = Patch{
+				newContent := strings.Split(re.ReplaceAllString(oldContent, replaceTo), "\n")
+				patch := ContentPatch{
 					PatchType:     PatchReplace,
 					OldLineNumber: oldLineNumber,
 					OldLineCount:  oldLineCount,
 					NewContent:    newContent,
 				}
-				fmt.Print(result)
+
+				result = append(result, patch)
+				
+				// fmt.Print(result)
+			}
+			if c.Operation.Delete != nil {
+				oldLineNumber := programLineNumber + 1 // the next line
+				oldLineCount := c.Operation.Delete.NumOfLines
+				patch := ContentPatch{
+					PatchType: PatchDelete,
+					OldLineNumber: oldLineNumber,
+					OldLineCount: oldLineCount,
+					NewContent: []string{},
+				}
+				// fmt.Println(patch)
+				result = append(result, patch)
 			}
 		}
 	}
-	return []Patch{result}
+	return result
 }

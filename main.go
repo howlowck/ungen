@@ -7,22 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-
-	"github.com/alecthomas/repr"
 )
 
 func main() {
 	inputDir := flag.String("i", "", "InputDirectory (Required)")
-	testFlag := flag.Bool("t", true, "Test a Simple string")
 	flag.Parse()
-
-	if *testFlag {
-		// prog, _ := Parse(`// UNGEN: replace "World" with var.app_name`)
-		// prog, _ := Parse(`// UNGEN: delete 3 lines`)
-		prog, _ := Parse(`// UNGEN: if var.app_name then delete 3 lines`)
-		repr.Println(prog)
-		os.Exit(0)
-	}
 
 	if *inputDir == "" {
 		flag.PrintDefaults()

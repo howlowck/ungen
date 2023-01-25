@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/alecthomas/participle/v2"
@@ -44,7 +43,8 @@ type Replace struct {
 }
 
 type Delete struct {
-	NumOfLines int `"delete" @INT "lines"`
+	NumOfLines int  `( "delete" @INT "lines"`
+	File       bool `  | "delete" "file" )`
 }
 
 type Value struct {
@@ -57,14 +57,7 @@ func Parse(code string) (*Program, error) {
 	if err != nil {
 		return nil, err
 	}
-	program.init()
 	return program, nil
-}
-
-func (p *Program) init() {
-	for _, cmd := range p.Commands {
-		fmt.Println(cmd)
-	}
 }
 
 var (
@@ -74,7 +67,7 @@ var (
 		{"STR", `'[^']*'|"[^"]*"`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
-		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines)\b`},
+		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines|file)\b`},
 		{"VAR", `var\.\w+`},
 		{"EOL", `[\n\r]+`},
 	})
