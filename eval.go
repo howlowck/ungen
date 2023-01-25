@@ -50,17 +50,17 @@ func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNu
 				}
 
 				result = append(result, patch)
-				
+
 				// fmt.Print(result)
 			}
 			if c.Operation.Delete != nil {
 				oldLineNumber := programLineNumber + 1 // the next line
 				oldLineCount := c.Operation.Delete.NumOfLines
 				patch := ContentPatch{
-					PatchType: PatchDelete,
+					PatchType:     PatchDelete,
 					OldLineNumber: oldLineNumber,
-					OldLineCount: oldLineCount,
-					NewContent: []string{},
+					OldLineCount:  oldLineCount,
+					NewContent:    []string{},
 				}
 				// fmt.Println(patch)
 				result = append(result, patch)

@@ -7,19 +7,19 @@ type ContentPatch struct {
 	NewContent    []string
 }
 
-func (p *ContentPatch) Apply (lines []string) []string {
+func (p *ContentPatch) Apply(lines []string) []string {
 	var oldLIneIndex int = p.OldLineNumber - 1
-	if (p.PatchType == PatchDelete) {
-		return append(lines[:oldLIneIndex], lines[(oldLIneIndex + p.OldLineNumber):]...)
+	if p.PatchType == PatchDelete {
+		return append(lines[:oldLIneIndex], lines[(oldLIneIndex+p.OldLineNumber):]...)
 	}
-	if (p.PatchType == PatchReplace) {
+	if p.PatchType == PatchReplace {
 		// Delete the line
-		temp := append(lines[:oldLIneIndex], lines[(oldLIneIndex + p.OldLineCount):]...)
+		temp := append(lines[:oldLIneIndex], lines[(oldLIneIndex+p.OldLineCount):]...)
 		// Insert new content
 		return append(temp[:oldLIneIndex], append(p.NewContent, temp[oldLIneIndex:]...)...)
 	}
 	// TODO: add test for insert
-	if (p.PatchType == PatchInsert) {
+	if p.PatchType == PatchInsert {
 		// Insert new content
 		return append(lines[:oldLIneIndex], append(p.NewContent, lines[oldLIneIndex:]...)...)
 	}

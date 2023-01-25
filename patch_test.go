@@ -4,11 +4,13 @@ import (
 	"reflect"
 	"testing"
 )
+
 type PatchTestCase struct {
 	original []string
-	patch ContentPatch
+	patch    ContentPatch
 	expected []string
 }
+
 func TestPatch(t *testing.T) {
 	testCases := []PatchTestCase{
 		{

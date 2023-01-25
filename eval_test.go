@@ -28,7 +28,7 @@ DEBUG=true
 	vars["use_dev"] = "true"
 
 	lines := regexp.MustCompile("\r?\n").Split(fileContent, -1)
-	
+
 	prog1, _ := Parse(`// UNGEN: replace "world" with "test"`)
 
 	patch1 := prog1.Evaluate(lines, vars, 2)
