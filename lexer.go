@@ -67,7 +67,7 @@ var (
 		{"STR", `'[^']*'|"[^"]*"`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
-		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines|file)\b`},
+		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines|file|folder)\b`},
 		{"VAR", `var\.\w+`},
 		{"EOL", `[\n\r]+`},
 	})

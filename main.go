@@ -28,6 +28,7 @@ func main() {
 
 		// Open the file
 		file, err := os.Open(path)
+		fmt.Println("path:", path)
 		if err != nil {
 			return err
 		}

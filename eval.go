@@ -5,8 +5,15 @@ import (
 	"strings"
 )
 
+type EvalContext struct {
+	lines []string
+	path string
+	vars map[string]string
+	programLineNumber int
+}
+
 // TODO: figure out how to do file or directory deletions
-func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNumber int) []Patch {
+func (p *Program) Evaluate(ctx EvalContext) []Patch {
 
 	var result []Patch
 
@@ -22,12 +29,12 @@ func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNu
 				} else {
 					varTemp := *c.Operation.Replace.To.Variable
 					varName := varTemp[4:] // take away 'var.'
-					replaceTo = vars[varName]
+					replaceTo = ctx.vars[varName]
 				}
-				oldLineNumber := programLineNumber + 1 // the next line
+				oldLineNumber := ctx.programLineNumber + 1 // the next line
 				oldLineCount := 1                      // default to 1
 
-				oldContent := strings.Join(lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
+				oldContent := strings.Join(ctx.lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
 				re := regexp.MustCompile(*replaceFrom)
 				newContent := strings.Split(re.ReplaceAllString(oldContent, replaceTo), "\n")
 				patch := Patch{
@@ -43,7 +50,7 @@ func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNu
 				// fmt.Print(result)
 			}
 			if c.Operation.Delete != nil {
-				oldLineNumber := programLineNumber + 1 // the next line
+				oldLineNumber := ctx.programLineNumber + 1 // the next line
 				oldLineCount := c.Operation.Delete.NumOfLines
 				contentPatch := ContentPatch{
 					PatchType:     PatchDelete,
@@ -54,7 +61,7 @@ func (p *Program) Evaluate(lines []string, vars map[string]string, programLineNu
 				patch := Patch{
 					Content: &contentPatch,
 				}
-				// fmt.Println(patch)
+				// fmt.Println(contentPatch)
 				result = append(result, patch)
 			}
 		}

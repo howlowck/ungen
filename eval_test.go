@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+type EvalTestCase struct {
+	Context EvalContext
+	Command string
+	Expected []Patch
+}
+
 func TestEval(t *testing.T) {
 
 	fileContent := `// this is a ini file
@@ -29,52 +35,66 @@ DEBUG=true
 
 	lines := regexp.MustCompile("\r?\n").Split(fileContent, -1)
 
-	prog1, _ := Parse(`// UNGEN: replace "world" with "test"`)
-
-	patch1 := prog1.Evaluate(lines, vars, 2)
-	expected1 := []Patch{{
-		Content: &ContentPatch{
-			PatchType:     PatchReplace,
-			OldLineNumber: 3,
-			OldLineCount:  1,
-			NewContent:    []string{"APP_NAME=hello-test"},
+	testCases := []EvalTestCase{
+		{
+			Context: EvalContext{
+				lines: lines,
+				path: ".env.test",
+				vars: vars,
+				programLineNumber: 2,
+			},
+			Command: `// UNGEN: replace "world" with "test"`,
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 3,
+					OldLineCount:  1,
+					NewContent:    []string{"APP_NAME=hello-test"},
+				},
+			}},
 		},
-	}}
-
-	eq1 := reflect.DeepEqual(patch1, expected1)
-	if !eq1 {
-		t.Error("Failed patch1 does not equal expected", eq1)
+		{
+			Context: EvalContext{
+				lines: lines,
+				path: ".env.test",
+				vars: vars,
+				programLineNumber: 5,
+			},
+			Command: `// UNGEN: replace "3000" with var.app_port`,
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 6,
+					OldLineCount:  1,
+					NewContent:    []string{"APP_PORT=8000"},
+				},
+			}},
+		},
+		{
+			Context: EvalContext{
+				lines: lines,
+				path: ".env.test",
+				vars: vars,
+				programLineNumber: 8,
+			},
+			Command: `// UNGEN: delete 2 lines`,
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 9,
+					OldLineCount:  2,
+					NewContent:    []string{},
+				},
+			}},
+		},
 	}
 
-	prog2, _ := Parse(`// UNGEN: replace "3000" with var.app_port`)
-	patch2 := prog2.Evaluate(lines, vars, 5)
-	expected2 := []Patch{{
-		Content: &ContentPatch{
-			PatchType:     PatchReplace,
-			OldLineNumber: 6,
-			OldLineCount:  1,
-			NewContent:    []string{"APP_PORT=8000"},
-		},
-	}}
-
-	eq2 := reflect.DeepEqual(patch2, expected2)
-	if !eq2 {
-		t.Error("Failed patch2 does not equal expected", eq2)
-	}
-
-	prog3, _ := Parse(`// UNGEN: delete 2 lines`)
-	patch3 := prog3.Evaluate(lines, vars, 8)
-	expected3 := []Patch{{
-		Content: &ContentPatch{
-			PatchType:     PatchDelete,
-			OldLineNumber: 9,
-			OldLineCount:  2,
-			NewContent:    []string{},
-		},
-	}}
-
-	eq3 := reflect.DeepEqual(patch3, expected3)
-	if !eq3 {
-		t.Error("Failed patch3 does not equal expected", eq3)
+	for i, c := range testCases {
+		p, _ := Parse(c.Command)
+		actual := p.Evaluate(c.Context)
+		eq := reflect.DeepEqual(actual, c.Expected)
+		if !eq {
+			t.Error("Failed actual does not equal expected at index:", i)
+		}
 	}
 }

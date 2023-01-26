@@ -11,7 +11,7 @@ type PatchTestCase struct {
 	expected []string
 }
 
-func TestPatch(t *testing.T) {
+func TestContentPatch(t *testing.T) {
 	testCases := []PatchTestCase{
 		{
 			[]string{
