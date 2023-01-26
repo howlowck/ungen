@@ -7,8 +7,8 @@ import (
 )
 
 type EvalTestCase struct {
-	Context EvalContext
-	Command string
+	Context  EvalContext
+	Command  string
 	Expected []Patch
 }
 
@@ -38,9 +38,9 @@ DEBUG=true
 	testCases := []EvalTestCase{
 		{
 			Context: EvalContext{
-				lines: lines,
-				path: ".env.test",
-				vars: vars,
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
 				programLineNumber: 2,
 			},
 			Command: `// UNGEN: replace "world" with "test"`,
@@ -55,9 +55,9 @@ DEBUG=true
 		},
 		{
 			Context: EvalContext{
-				lines: lines,
-				path: ".env.test",
-				vars: vars,
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
 				programLineNumber: 5,
 			},
 			Command: `// UNGEN: replace "3000" with var.app_port`,
@@ -72,9 +72,9 @@ DEBUG=true
 		},
 		{
 			Context: EvalContext{
-				lines: lines,
-				path: ".env.test",
-				vars: vars,
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
 				programLineNumber: 8,
 			},
 			Command: `// UNGEN: delete 2 lines`,

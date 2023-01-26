@@ -6,9 +6,9 @@ import (
 )
 
 type EvalContext struct {
-	lines []string
-	path string
-	vars map[string]string
+	lines             []string
+	path              string
+	vars              map[string]string
 	programLineNumber int
 }
 
@@ -32,7 +32,7 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 					replaceTo = ctx.vars[varName]
 				}
 				oldLineNumber := ctx.programLineNumber + 1 // the next line
-				oldLineCount := 1                      // default to 1
+				oldLineCount := 1                          // default to 1
 
 				oldContent := strings.Join(ctx.lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
 				re := regexp.MustCompile(*replaceFrom)
