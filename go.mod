@@ -9,5 +9,6 @@ require (
 
 require (
 	github.com/alecthomas/assert/v2 v2.2.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 )
