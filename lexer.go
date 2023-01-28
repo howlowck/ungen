@@ -43,13 +43,22 @@ type Replace struct {
 }
 
 type Delete struct {
-	NumOfLines int  `( "delete" @INT "lines"`
-	File       bool `  | "delete" "file" )`
+	NumOfLines int  `( "delete" @INT ( "lines" | "line" )`
+	File       bool `  | "delete" "file" `
+	Directory  bool `  | "delete" "folder" )`
 }
 
 type Value struct {
 	String   *string `( @STR`
-	Variable *string `  | @VAR )`
+	Variable *string `  | @VAR`
+	Func 	 *Function `| @@ )`
+}
+
+type Function struct {
+	FunctionName *string `@FUNC`
+	LeftParen 	 *string `"("`
+	Value     	 *Value `@@`
+	RightParen 	 *string `")"`
 }
 
 func Parse(code string) (*Program, error) {
@@ -63,11 +72,14 @@ func Parse(code string) (*Program, error) {
 var (
 	basicLexer = lexer.MustSimple([]lexer.SimpleRule{
 		{"whitespace", `\s+`},
-
+		{"PAREN", `(\(|\))`},
+		{"BRACE", `(\{|\})`},
 		{"STR", `'[^']*'|"[^"]*"`},
+		{"FUNC", `(kebabCase|titleCase|snakeCase|camelCase)\b`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
-		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|lines|file|folder)\b`},
+		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete)\b`},
+		{"UNIT", `(?i)\b(lines|line|file|folder)\b`},
 		{"VAR", `var\.\w+`},
 		{"EOL", `[\n\r]+`},
 	})
