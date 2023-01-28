@@ -44,21 +44,22 @@ type Replace struct {
 
 type Delete struct {
 	NumOfLines int  `( "delete" @INT ( "lines" | "line" )`
-	File       bool `  | "delete" "file" `
-	Directory  bool `  | "delete" "folder" )`
+	File       bool `  | "delete" @"file" `
+	Directory  bool `  | "delete" @"folder" )`
 }
 
 type Value struct {
-	String   *string `( @STR`
-	Variable *string `  | @VAR`
-	Func 	 *Function `| @@ )`
+	// TODO: figure out how parse out the braces and value in string
+	String   *string   `( @STR`
+	Variable *string   `  | @VAR`
+	Func     *Function `| @@ )`
 }
 
 type Function struct {
 	FunctionName *string `@FUNC`
-	LeftParen 	 *string `"("`
-	Value     	 *Value `@@`
-	RightParen 	 *string `")"`
+	LeftParen    *string `"("`
+	Value        *Value  `@@`
+	RightParen   *string `")"`
 }
 
 func Parse(code string) (*Program, error) {
@@ -88,6 +89,5 @@ var (
 		participle.Lexer(basicLexer),
 		participle.CaseInsensitive("KEYWORD"),
 		participle.Unquote("STR"),
-		// participle.UseLookahead(2),
 	)
 )

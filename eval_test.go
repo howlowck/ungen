@@ -27,6 +27,9 @@ REMOVE=false
 
 // UNGEN: if var.use_dev then delete 1 line
 DEBUG=true
+
+// UNGEN: replace "false" with titleCase(var.use_dev)
+TITLE=false
 	`
 
 	vars := make(map[string]string)
@@ -87,6 +90,23 @@ DEBUG=true
 				},
 			}},
 		},
+		// {
+		// 	Context: EvalContext{
+		// 		lines:             lines,
+		// 		path:              ".env.test",
+		// 		vars:              vars,
+		// 		programLineNumber: 15,
+		// 	},
+		// 	Command: `// UNGEN: replace "false" with titleCase(var.use_dev)`,
+		// 	Expected: []Patch{{
+		// 		Content: &ContentPatch{
+		// 			PatchType:     PatchReplace,
+		// 			OldLineNumber: 15,
+		// 			OldLineCount:  2,
+		// 			NewContent:    []string{"TITLE=True"},
+		// 		},
+		// 	}},
+		// },
 	}
 
 	for i, c := range testCases {
