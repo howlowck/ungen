@@ -24,13 +24,8 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 				replaceFrom := c.Operation.Replace.From.String
 
 				var replaceTo string
-				if c.Operation.Replace.To.String != nil {
-					replaceTo = *(c.Operation.Replace.To.String)
-				} else {
-					varTemp := *c.Operation.Replace.To.Variable
-					varName := varTemp[4:] // take away 'var.'
-					replaceTo = ctx.vars[varName]
-				}
+				// TODO: recursively handle Value
+				replaceTo = c.Operation.Replace.To.Evaluate(ctx, []string{})
 				oldLineNumber := ctx.programLineNumber + 1 // the next line
 				oldLineCount := 1                          // default to 1
 
@@ -67,4 +62,17 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 		}
 	}
 	return result
+}
+
+func (v *Value) Evaluate(ctx EvalContext, inputs []string) string {
+	if v.String != nil {
+		return *v.String
+	}
+	if v.Variable != nil {
+		varTemp := *v.Variable
+		varName := varTemp[4:] // take away 'var.'
+		return ctx.vars[varName]
+	}
+	// TODO: add string transformation functions
+	return ""
 }
