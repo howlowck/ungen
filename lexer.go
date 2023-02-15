@@ -50,16 +50,16 @@ type Delete struct {
 
 type Value struct {
 	// TODO: figure out how parse out the braces and value in string
-	String   *string   `( @STR`
-	Variable *string   `  | @VAR`
-	Func     *Function `| @@ )`
+	String   *string      `( @STR`
+	Variable *string      `  | @VAR`
+	StrFunc  *StrFunction `| @@ )`
 }
 
-type Function struct {
-	FunctionName *string `@FUNC`
-	LeftParen    *string `"("`
-	Value        *Value  `@@`
-	RightParen   *string `")"`
+type StrFunction struct {
+	FunctionName string   `@STRFUNC`
+	LeftParen    *string  `"("`
+	Params       []*Value `@@? ("," @@)*`
+	RightParen   *string  `")"`
 }
 
 func Parse(code string) (*Program, error) {
@@ -74,9 +74,9 @@ var (
 	basicLexer = lexer.MustSimple([]lexer.SimpleRule{
 		{"whitespace", `\s+`},
 		{"PAREN", `(\(|\))`},
-		{"BRACE", `(\{|\})`},
+		{"COMMA", `,`},
 		{"STR", `'[^']*'|"[^"]*"`},
-		{"FUNC", `(kebabCase|titleCase|snakeCase|camelCase)\b`},
+		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute)\b`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
 		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete)\b`},

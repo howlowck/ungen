@@ -4,18 +4,16 @@ import (
 	"testing"
 
 	require "github.com/alecthomas/assert/v2"
-	"github.com/alecthomas/repr"
 )
 
 func TestLexer(t *testing.T) {
 	cases := []string{
 		`// UNGEN: replace "World" with var.app_name`,
 		`// UNGEN: delete 3 lines`,
-		// TODO: still need to parse out braces and value
 		`// UNGEN: replace "World" with "New ${var.app_name}"`,
 		`// UNGEN: replace "World" with kebabCase(var.app_name)`,
 		`// UNGEN: replace "World" with titleCase(var.app_name)`,
-		// TODO: Need to Evaluate condition
+		`// UNGEN: replace "World" with substitute(var.app_name, "-", "")`,
 		`// UNGEN:v1 if var.app_name then delete 3 lines`,
 		`// UNGEN: if var.app_name then delete 3 lines else delete 1 line`,
 		`# UNGEN: delete 1 line`,
@@ -25,8 +23,8 @@ func TestLexer(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		p, err := Parse(c)
-		repr.Println(c, p)
+		_, err := Parse(c)
+		// repr.Println(c, p)
 		require.NoError(t, err)
 	}
 }

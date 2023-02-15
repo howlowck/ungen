@@ -135,7 +135,6 @@ func copyFile(src, dst string) error {
 }
 
 func copyDir(src string, dst string, ignoreList []string) error {
-	// fmt.Println("!!!!!!!!!!!!!!!!!!! copyDir !!!!!!!!!!!!!!!!!!!", ignoreList)
 	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

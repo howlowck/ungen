@@ -3,6 +3,8 @@ package main
 import (
 	"regexp"
 	"strings"
+
+	"github.com/iancoleman/strcase"
 )
 
 type EvalContext struct {
@@ -10,6 +12,16 @@ type EvalContext struct {
 	path              string
 	vars              map[string]string
 	programLineNumber int
+}
+
+func ProcessLineNumber(patch Patch, deleteLineNumber bool) Patch {
+	result := patch
+
+	if deleteLineNumber == true {
+		result.Content.OldLineNumber = patch.Content.OldLineNumber - 1
+		result.Content.OldLineCount = patch.Content.OldLineCount + 1
+	}
+	return result
 }
 
 // TODO: figure out how to do file or directory deletions
@@ -23,9 +35,7 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 			if c.Operation.Replace != nil {
 				replaceFrom := c.Operation.Replace.From.String
 
-				var replaceTo string
-				// TODO: recursively handle Value
-				replaceTo = c.Operation.Replace.To.Evaluate(ctx, []string{})
+				replaceTo := c.Operation.Replace.To.Evaluate(ctx, []string{})
 				oldLineNumber := ctx.programLineNumber + 1 // the next line
 				oldLineCount := 1                          // default to 1
 
@@ -40,6 +50,8 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 						NewContent:    newContent,
 					}}
 
+				// TODO: parse keep line or not
+				patch = ProcessLineNumber(patch, false)
 				result = append(result, patch)
 
 				// fmt.Print(result)
@@ -57,10 +69,12 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 					Content: &contentPatch,
 				}
 				// fmt.Println(contentPatch)
+				patch = ProcessLineNumber(patch, false)
 				result = append(result, patch)
 			}
 		}
 	}
+
 	return result
 }
 
@@ -73,6 +87,37 @@ func (v *Value) Evaluate(ctx EvalContext, inputs []string) string {
 		varName := varTemp[4:] // take away 'var.'
 		return ctx.vars[varName]
 	}
-	// TODO: add string transformation functions
+	if v.StrFunc != nil {
+		params := []string{}
+
+		for _, pv := range v.StrFunc.Params {
+			value := pv.Evaluate(ctx, []string{})
+			params = append(params, value)
+		}
+
+		// TODO what to put in the slice?
+		value := params[0]
+		if v.StrFunc.FunctionName == "kebabCase" {
+			return strcase.ToKebab(value)
+		}
+		if v.StrFunc.FunctionName == "snakeCase" {
+			return strcase.ToSnake(value)
+		}
+		if v.StrFunc.FunctionName == "camelCase" {
+			return strcase.ToLowerCamel(value)
+		}
+		if v.StrFunc.FunctionName == "upperCamelCase" {
+			return strcase.ToCamel(value)
+		}
+		if v.StrFunc.FunctionName == "upperCase" {
+			return strings.ToUpper(value)
+		}
+		if v.StrFunc.FunctionName == "lowerCase" {
+			return strings.ToLower(value)
+		}
+		if v.StrFunc.FunctionName == "substitute" {
+			return strings.ReplaceAll(value, params[1], params[2])
+		}
+	}
 	return ""
 }

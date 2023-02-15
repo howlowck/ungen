@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"testing"
@@ -28,13 +29,17 @@ REMOVE=false
 // UNGEN: if var.use_dev then delete 1 line
 DEBUG=true
 
-// UNGEN: replace "false" with titleCase(var.use_dev)
+// UNGEN: replace "false" with upperCase(var.use_dev)
 TITLE=false
-	`
+
+// UNGEN: replace "changeme" with substitute(var.app_name, "-", "")
+STORAGE_ACCOUNT=changeme
+`
 
 	vars := make(map[string]string)
 	vars["app_port"] = "8000"
 	vars["use_dev"] = "true"
+	vars["app_name"] = "test-app"
 
 	lines := regexp.MustCompile("\r?\n").Split(fileContent, -1)
 
@@ -90,28 +95,48 @@ TITLE=false
 				},
 			}},
 		},
-		// {
-		// 	Context: EvalContext{
-		// 		lines:             lines,
-		// 		path:              ".env.test",
-		// 		vars:              vars,
-		// 		programLineNumber: 15,
-		// 	},
-		// 	Command: `// UNGEN: replace "false" with titleCase(var.use_dev)`,
-		// 	Expected: []Patch{{
-		// 		Content: &ContentPatch{
-		// 			PatchType:     PatchReplace,
-		// 			OldLineNumber: 15,
-		// 			OldLineCount:  2,
-		// 			NewContent:    []string{"TITLE=True"},
-		// 		},
-		// 	}},
-		// },
+		{
+			Context: EvalContext{
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
+				programLineNumber: 15,
+			},
+			Command: lines[14],
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 16,
+					OldLineCount:  1,
+					NewContent:    []string{"TITLE=TRUE"},
+				},
+			}},
+		},
+		{
+			Context: EvalContext{
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
+				programLineNumber: 18,
+			},
+			Command: lines[17],
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 19,
+					OldLineCount:  1,
+					NewContent:    []string{"STORAGE_ACCOUNT=testapp"},
+				},
+			}},
+		},
 	}
 
 	for i, c := range testCases {
 		p, _ := Parse(c.Command)
 		actual := p.Evaluate(c.Context)
+		for _, ap := range actual {
+			fmt.Println(*ap.Content)
+		}
 		eq := reflect.DeepEqual(actual, c.Expected)
 		if !eq {
 			t.Error("Failed actual does not equal expected at index:", i)
