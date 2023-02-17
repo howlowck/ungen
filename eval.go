@@ -118,6 +118,13 @@ func (v *Value) Evaluate(ctx EvalContext, inputs []string) string {
 		if v.StrFunc.FunctionName == "substitute" {
 			return strings.ReplaceAll(value, params[1], params[2])
 		}
+		if v.StrFunc.FunctionName == "concat" {
+			var result string
+			for _, curr := range params {
+				result += curr
+			}
+			return result
+		}
 	}
 	return ""
 }

@@ -34,6 +34,9 @@ TITLE=false
 
 // UNGEN: replace "changeme" with substitute(var.app_name, "-", "")
 STORAGE_ACCOUNT=changeme
+
+// UNGEN: replace "changeme" with concat(var.app_name, " ", "welcomes you")
+STARTUP_MESSAGE=changeme
 `
 
 	vars := make(map[string]string)
@@ -126,6 +129,23 @@ STORAGE_ACCOUNT=changeme
 					OldLineNumber: 19,
 					OldLineCount:  1,
 					NewContent:    []string{"STORAGE_ACCOUNT=testapp"},
+				},
+			}},
+		},
+		{
+			Context: EvalContext{
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
+				programLineNumber: 21,
+			},
+			Command: lines[20],
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 22,
+					OldLineCount:  1,
+					NewContent:    []string{"STARTUP_MESSAGE=test-app welcomes you"},
 				},
 			}},
 		},

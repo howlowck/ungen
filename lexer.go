@@ -76,7 +76,7 @@ var (
 		{"PAREN", `(\(|\))`},
 		{"COMMA", `,`},
 		{"STR", `'[^']*'|"[^"]*"`},
-		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute)\b`},
+		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute|concat)\b`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
 		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete)\b`},
