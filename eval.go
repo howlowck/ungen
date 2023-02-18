@@ -11,13 +11,14 @@ type EvalContext struct {
 	lines             []string
 	path              string
 	vars              map[string]string
+	keepLine          bool
 	programLineNumber int
 }
 
-func ProcessLineNumber(patch Patch, deleteLineNumber bool) Patch {
+func ProcessLineNumber(patch Patch, keepLine bool) Patch {
 	result := patch
 
-	if deleteLineNumber == true {
+	if !keepLine {
 		result.Content.OldLineNumber = patch.Content.OldLineNumber - 1
 		result.Content.OldLineCount = patch.Content.OldLineCount + 1
 	}
@@ -67,8 +68,7 @@ func (v *Operation) Evaluate(ctx EvalContext) Patch {
 				NewContent:    newContent,
 			}}
 
-		// TODO: parse keep line or not
-		return ProcessLineNumber(patch, false)
+		return ProcessLineNumber(patch, ctx.keepLine)
 	}
 
 	// if not replace, then it's delete
@@ -83,8 +83,8 @@ func (v *Operation) Evaluate(ctx EvalContext) Patch {
 	patch := Patch{
 		Content: &contentPatch,
 	}
-	// fmt.Println(contentPatch)
-	return ProcessLineNumber(patch, false)
+
+	return ProcessLineNumber(patch, ctx.keepLine)
 
 }
 

@@ -37,6 +37,7 @@ func main() {
 
 	inputDir := flag.String("i", "", "InputDirectory (Required)")
 	outputDir := flag.String("o", "", "OutputDirectory (Required)")
+	keepLine := flag.Bool("keep", false, "Keep the UNGEN line")
 	flag.Var(&vars, "var", "Set Variables (ex. -var foo=bar -var baz=qux)")
 
 	flag.Parse()
@@ -92,6 +93,7 @@ func main() {
 					lines:             lines,
 					vars:              vars,
 					path:              path,
+					keepLine:          *keepLine,
 					programLineNumber: i + 1,
 				}
 				fmt.Println(v)
