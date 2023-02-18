@@ -32,45 +32,15 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 	for _, c := range p.Commands {
 
 		if c.Operation != nil {
-			if c.Operation.Replace != nil {
-				replaceFrom := c.Operation.Replace.From.String
+			result = append(result, c.Operation.Evaluate(ctx))
+		}
 
-				replaceTo := c.Operation.Replace.To.Evaluate(ctx, []string{})
-				oldLineNumber := ctx.programLineNumber + 1 // the next line
-				oldLineCount := 1                          // default to 1
-
-				oldContent := strings.Join(ctx.lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
-				re := regexp.MustCompile(*replaceFrom)
-				newContent := strings.Split(re.ReplaceAllString(oldContent, replaceTo), "\n")
-				patch := Patch{
-					Content: &ContentPatch{
-						PatchType:     PatchReplace,
-						OldLineNumber: oldLineNumber,
-						OldLineCount:  oldLineCount,
-						NewContent:    newContent,
-					}}
-
-				// TODO: parse keep line or not
-				patch = ProcessLineNumber(patch, false)
-				result = append(result, patch)
-
-				// fmt.Print(result)
-			}
-			if c.Operation.Delete != nil {
-				oldLineNumber := ctx.programLineNumber + 1 // the next line
-				oldLineCount := c.Operation.Delete.NumOfLines
-				contentPatch := ContentPatch{
-					PatchType:     PatchDelete,
-					OldLineNumber: oldLineNumber,
-					OldLineCount:  oldLineCount,
-					NewContent:    []string{},
-				}
-				patch := Patch{
-					Content: &contentPatch,
-				}
-				// fmt.Println(contentPatch)
-				patch = ProcessLineNumber(patch, false)
-				result = append(result, patch)
+		if c.IfConditional != nil {
+			conditionalValue := c.IfConditional.Condition.Evaluate(ctx, []string{})
+			if conditionalValue == "true" {
+				result = append(result, c.IfConditional.Then.Evaluate(ctx))
+			} else {
+				result = append(result, c.IfConditional.Else.Evaluate(ctx))
 			}
 		}
 	}
@@ -78,10 +48,51 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 	return result
 }
 
+func (v *Operation) Evaluate(ctx EvalContext) Patch {
+	if v.Replace != nil {
+		replaceFrom := v.Replace.From.String
+
+		replaceTo := v.Replace.To.Evaluate(ctx, []string{})
+		oldLineNumber := ctx.programLineNumber + 1 // the next line
+		oldLineCount := 1                          // default to 1
+
+		oldContent := strings.Join(ctx.lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
+		re := regexp.MustCompile(*replaceFrom)
+		newContent := strings.Split(re.ReplaceAllString(oldContent, replaceTo), "\n")
+		patch := Patch{
+			Content: &ContentPatch{
+				PatchType:     PatchReplace,
+				OldLineNumber: oldLineNumber,
+				OldLineCount:  oldLineCount,
+				NewContent:    newContent,
+			}}
+
+		// TODO: parse keep line or not
+		return ProcessLineNumber(patch, false)
+	}
+
+	// if not replace, then it's delete
+	oldLineNumber := ctx.programLineNumber + 1 // the next line
+	oldLineCount := v.Delete.NumOfLines
+	contentPatch := ContentPatch{
+		PatchType:     PatchDelete,
+		OldLineNumber: oldLineNumber,
+		OldLineCount:  oldLineCount,
+		NewContent:    []string{},
+	}
+	patch := Patch{
+		Content: &contentPatch,
+	}
+	// fmt.Println(contentPatch)
+	return ProcessLineNumber(patch, false)
+
+}
+
 func (v *Value) Evaluate(ctx EvalContext, inputs []string) string {
 	if v.String != nil {
 		return *v.String
 	}
+
 	if v.Variable != nil {
 		varTemp := *v.Variable
 		varName := varTemp[4:] // take away 'var.'

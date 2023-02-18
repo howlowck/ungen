@@ -23,13 +23,9 @@ type Header struct {
 }
 
 type If struct {
-	Condition *Expr      `"IF" @@`
+	Condition *Value     `"IF" @@`
 	Then      *Operation `"THEN" @@`
 	Else      *Operation `("ELSE" @@)?`
-}
-
-type Expr struct {
-	Value *Value `@@`
 }
 
 type Operation struct {

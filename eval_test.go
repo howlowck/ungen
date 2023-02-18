@@ -54,7 +54,7 @@ STARTUP_MESSAGE=changeme
 				vars:              vars,
 				programLineNumber: 2,
 			},
-			Command: `// UNGEN: replace "world" with "test"`,
+			Command: lines[1],
 			Expected: []Patch{{
 				Content: &ContentPatch{
 					PatchType:     PatchReplace,
@@ -71,7 +71,7 @@ STARTUP_MESSAGE=changeme
 				vars:              vars,
 				programLineNumber: 5,
 			},
-			Command: `// UNGEN: replace "3000" with var.app_port`,
+			Command: lines[4],
 			Expected: []Patch{{
 				Content: &ContentPatch{
 					PatchType:     PatchReplace,
@@ -88,7 +88,7 @@ STARTUP_MESSAGE=changeme
 				vars:              vars,
 				programLineNumber: 8,
 			},
-			Command: `// UNGEN: delete 2 lines`,
+			Command: lines[7],
 			Expected: []Patch{{
 				Content: &ContentPatch{
 					PatchType:     PatchDelete,

@@ -6,16 +6,39 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 )
 
+type varMap map[string]string
+
+// Implement Set method for varMap
+func (m *varMap) Set(s string) error {
+	kv := strings.Split(s, "=")
+	if len(kv) == 2 {
+		(*m)[kv[0]] = kv[1]
+	}
+	// TODO: maybe need to unset a value of there is 1 element
+	return nil
+}
+
+// Implement String method for kvMap
+func (m *varMap) String() string {
+	return fmt.Sprint(*m)
+}
+
 func main() {
+	vars := make(varMap)
+
 	inputDir := flag.String("i", "", "InputDirectory (Required)")
 	outputDir := flag.String("o", "", "OutputDirectory (Required)")
+	flag.Var(&vars, "var", "Set Variables (ex. -var foo=bar -var baz=qux)")
+
 	flag.Parse()
 
 	if *inputDir == "" {
@@ -52,37 +75,43 @@ func main() {
 			return nil
 		}
 
-		// Open the file
-		file, err := os.Open(path)
-		// fmt.Println("path:", path)
+		// Read the file
+		body, err := os.ReadFile(path)
 		if err != nil {
-			return err
+			// Handle error
+			log.Fatalf("unable to read file: %v", err)
 		}
-		defer file.Close()
+
+		lines := strings.Split(string(body), "\n")
 
 		// 2. Process in the staging directory
-		// Scan the file line by line
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			if r.MatchString(line) {
-				// Process Line
-				// Extract the line after the prefix
-				cmd := r.FindStringSubmatch(line)
-				fmt.Println(cmd[1])
+		for i, v := range lines {
+			// fmt.Println(i, v)
+			if r.MatchString(v) {
+				context := EvalContext{
+					lines:             lines,
+					vars:              vars,
+					path:              path,
+					programLineNumber: i + 1,
+				}
+				fmt.Println(v)
+				program, _ := Parse(v)
+				patches := program.Evaluate(context)
+				for _, patch := range patches {
+					if patch.Content != nil {
+						lines = patch.Content.Apply(lines)
+					}
+				}
 			}
 		}
 
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, "reading standard input:", err)
-		}
-
-		// 3. Copy the staging directory to the output directory
-		err = copyDir(tempDir, *outputDir, ignoreList)
-
+		// Overwrite the file with new content
+		os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0777)
 		return nil
 	})
+
+	// 3. Copy the staging directory to the output directory
+	copyDir(tempDir, *outputDir, ignoreList)
 }
 
 func getIgnorePatterns(path string) []string {
@@ -103,7 +132,7 @@ func getIgnorePatterns(path string) []string {
 	// Iterate through the lines of the file
 	for scanner.Scan() {
 		// Add each line as an ignore pattern
-		ignore = append(ignore, scanner.Text())
+		ignore = append(ignore, strings.TrimSpace(scanner.Text()))
 	}
 
 	// check for any errors while scanning
@@ -148,8 +177,9 @@ func copyDir(src string, dst string, ignoreList []string) error {
 		dstPath := filepath.Join(dst, relPath)
 
 		for _, pattern := range ignoreList {
+			normalizedPattern := strings.TrimLeft(strings.Trim(pattern, "*"), "/")
 			// base := filepath.Base(path)
-			match, _ := doublestar.PathMatch(pattern, path)
+			match, _ := doublestar.PathMatch("**/"+normalizedPattern+"**", path)
 
 			if match {
 				// fmt.Println("pattern:", pattern, "path:", path, "match:", match)
