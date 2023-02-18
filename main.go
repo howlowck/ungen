@@ -180,8 +180,13 @@ func copyDir(src string, dst string, ignoreList []string) error {
 
 		for _, pattern := range ignoreList {
 			normalizedPattern := strings.TrimLeft(strings.Trim(pattern, "*"), "/")
-			// base := filepath.Base(path)
-			match, _ := doublestar.PathMatch("**/"+normalizedPattern+"**", path)
+
+			// append "**" only if pattern ends in /
+			if strings.HasSuffix(pattern, "/") {
+				normalizedPattern += "**"
+			}
+
+			match, _ := doublestar.PathMatch("**/"+normalizedPattern, path)
 
 			if match {
 				// fmt.Println("pattern:", pattern, "path:", path, "match:", match)
