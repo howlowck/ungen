@@ -179,7 +179,7 @@ func copyDir(src string, dst string, ignoreList []string) error {
 		dstPath := filepath.Join(dst, relPath)
 
 		for _, pattern := range ignoreList {
-			normalizedPattern := strings.TrimLeft(strings.Trim(pattern, "*"), "/")
+			normalizedPattern := strings.TrimLeft(pattern, "/")
 
 			// append "**" only if pattern ends in /
 			if strings.HasSuffix(pattern, "/") {
