@@ -28,13 +28,6 @@ const (
 	DirectoryRename
 )
 
-type ContentPatch struct {
-	PatchType     PatchType
-	OldLineNumber int
-	OldLineCount  int
-	NewContent    []string
-}
-
 func (t FileSystemOp) String() string {
 	return [...]string{"FileCreate", "FileDelete", "FileRename", "DirectoryDelete", "DirectoryRename"}[t]
 }
@@ -42,6 +35,13 @@ func (t FileSystemOp) String() string {
 type Patch struct {
 	Content *ContentPatch
 	File    *FilePatch
+}
+
+type ContentPatch struct {
+	PatchType     PatchType
+	OldLineNumber int
+	OldLineCount  int
+	NewContent    []string
 }
 
 type FilePatch struct {

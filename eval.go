@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path"
 	"regexp"
 	"strings"
 
@@ -71,13 +72,34 @@ func (v *Operation) Evaluate(ctx EvalContext) Patch {
 		return ProcessLineNumber(patch, ctx.keepLine)
 	}
 
+	if v.Delete.File != nil {
+		patch := Patch{
+			File: &FilePatch{
+				FileOp:     FileDelete,
+				TargetPath: ctx.path,
+			},
+		}
+		return patch
+	}
+
+	if v.Delete.Directory != nil {
+		dir, _ := path.Split(ctx.path)
+		patch := Patch{
+			File: &FilePatch{
+				FileOp:     DirectoryDelete,
+				TargetPath: dir,
+			},
+		}
+		return patch
+	}
+
 	// if not replace, then it's delete
 	oldLineNumber := ctx.programLineNumber + 1 // the next line
 	oldLineCount := v.Delete.NumOfLines
 	contentPatch := ContentPatch{
 		PatchType:     PatchDelete,
 		OldLineNumber: oldLineNumber,
-		OldLineCount:  oldLineCount,
+		OldLineCount:  *oldLineCount,
 		NewContent:    []string{},
 	}
 	patch := Patch{

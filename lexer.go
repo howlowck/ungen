@@ -39,9 +39,9 @@ type Replace struct {
 }
 
 type Delete struct {
-	NumOfLines int  `( "delete" @INT ( "lines" | "line" )`
-	File       bool `  | "delete" @"file" `
-	Directory  bool `  | "delete" @"folder" )`
+	NumOfLines *int  `( "delete" @INT ( "lines" | "line" )`
+	File       *bool `  | "delete" @"file" `
+	Directory  *bool `  | "delete" @"folder" )`
 }
 
 type Value struct {

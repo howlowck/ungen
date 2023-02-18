@@ -84,6 +84,7 @@ func main() {
 		}
 
 		lines := strings.Split(string(body), "\n")
+		fileOps := []Patch{}
 
 		// 2. Process in the staging directory
 		for i, v := range lines {
@@ -103,12 +104,30 @@ func main() {
 					if patch.Content != nil {
 						lines = patch.Content.Apply(lines)
 					}
+					if patch.File != nil {
+						fileOps = append(fileOps, patch)
+					}
 				}
 			}
 		}
 
 		// Overwrite the file with new content
 		os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0777)
+
+		// TODO: it's doing extra work.. need to exit fast later
+		for _, p := range fileOps {
+			if p.File != nil {
+				if p.File.FileOp == FileDelete {
+					fmt.Println("!!!!!!!!!!! delete file:", p.File.TargetPath)
+					os.Remove(p.File.TargetPath)
+				}
+				if p.File.FileOp == DirectoryDelete {
+					fmt.Println("!!!!!!!!!!! delete folder:", p.File.TargetPath)
+					os.RemoveAll(p.File.TargetPath)
+				}
+			}
+		}
+
 		return nil
 	})
 

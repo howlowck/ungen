@@ -37,6 +37,9 @@ STORAGE_ACCOUNT=changeme
 
 // UNGEN: replace "changeme" with concat(var.app_name, " ", "welcomes you")
 STARTUP_MESSAGE=changeme
+
+// UNGEN: delete file
+// UNGEN: delete folder
 `
 
 	vars := make(map[string]string)
@@ -155,13 +158,49 @@ STARTUP_MESSAGE=changeme
 				},
 			}},
 		},
+		{
+			Context: EvalContext{
+				lines:             lines,
+				path:              ".env.test",
+				vars:              vars,
+				keepLine:          true,
+				programLineNumber: 24,
+			},
+			Command: lines[23],
+			Expected: []Patch{{
+				File: &FilePatch{
+					FileOp:     FileDelete,
+					TargetPath: ".env.test",
+				},
+			}},
+		},
+		{
+			Context: EvalContext{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				keepLine:          true,
+				programLineNumber: 25,
+			},
+			Command: lines[24],
+			Expected: []Patch{{
+				File: &FilePatch{
+					FileOp:     DirectoryDelete,
+					TargetPath: "test/",
+				},
+			}},
+		},
 	}
 
 	for i, c := range testCases {
 		p, _ := Parse(c.Command)
 		actual := p.Evaluate(c.Context)
 		for _, ap := range actual {
-			fmt.Println(*ap.Content)
+			if ap.File != nil {
+				fmt.Println(*ap.File)
+			} else {
+				fmt.Println(*ap.Content)
+			}
 		}
 		eq := reflect.DeepEqual(actual, c.Expected)
 		if !eq {
