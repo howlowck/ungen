@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"path"
 	"regexp"
 	"strings"
@@ -42,7 +43,22 @@ func (p *Program) Evaluate(ctx EvalContext) []Patch {
 			if conditionalValue == "true" {
 				result = append(result, c.IfConditional.Then.Evaluate(ctx))
 			} else {
-				result = append(result, c.IfConditional.Else.Evaluate(ctx))
+				if c.IfConditional.Else != nil {
+					result = append(result, c.IfConditional.Else.Evaluate(ctx))
+				} else {
+					oldLineNumber := ctx.programLineNumber + 1 // the next line
+					contentPatch := ContentPatch{
+						PatchType:     PatchDelete,
+						OldLineNumber: oldLineNumber,
+						OldLineCount:  0,
+						NewContent:    []string{},
+					}
+					patch := Patch{
+						Content: &contentPatch,
+					}
+					processed := ProcessLineNumber(patch, ctx.keepLine)
+					result = append(result, processed)
+				}
 			}
 		}
 	}
@@ -118,7 +134,13 @@ func (v *Value) Evaluate(ctx EvalContext, inputs []string) string {
 	if v.Variable != nil {
 		varTemp := *v.Variable
 		varName := varTemp[4:] // take away 'var.'
-		return ctx.vars[varName]
+		strValue, ok := ctx.vars[varName]
+		if ok {
+			return strValue
+		} else {
+			fmt.Println("warning! Variable " + varName + " does not exist")
+			return ""
+		}
 	}
 	if v.StrFunc != nil {
 		params := []string{}
