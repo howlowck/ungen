@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"bufio"
 	"flag"
 	"fmt"
@@ -38,6 +39,8 @@ func main() {
 	inputDir := flag.String("i", "", "InputDirectory (Required)")
 	outputDir := flag.String("o", "", "OutputDirectory (Required)")
 	keepLine := flag.Bool("keep", false, "Keep the UNGEN line")
+	zipOutput := flag.Bool("zip", false, "Zip the output directory into a file")
+	
 	flag.Var(&vars, "var", "Set Variables (ex. -var foo=bar -var baz=qux)")
 
 	flag.Parse()
@@ -69,7 +72,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("copied to Dir:", tempDir)
+	fmt.Println("✅ Copied to Temp Dir:", tempDir)
 	filepath.Walk(tempDir, func(path string, info os.FileInfo, e error) error {
 		// Skip directories (since they will be scanned recursively)
 		if info.IsDir() {
@@ -85,11 +88,11 @@ func main() {
 
 		lines := strings.Split(string(body), "\n")
 		fileOps := []Patch{}
-
+		fmt.Println("Processing file: " + strings.Replace(path, tempDir + "/", "", 1))
 		// 2. Process in the staging directory
 		for i, v := range lines {
-			// fmt.Println(i, v)
 			if r.MatchString(v) {
+				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
 				context := EvalContext{
 					lines:             lines,
 					vars:              vars,
@@ -97,7 +100,6 @@ func main() {
 					keepLine:          *keepLine,
 					programLineNumber: i + 1,
 				}
-				fmt.Println(v)
 				program, _ := Parse(v)
 				patches := program.Evaluate(context)
 				for _, patch := range patches {
@@ -110,29 +112,38 @@ func main() {
 				}
 			}
 		}
-
+		
 		// Overwrite the file with new content
 		os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0777)
-
+		
+		
 		// TODO: it's doing extra work.. need to exit fast later
+		
 		for _, p := range fileOps {
 			if p.File != nil {
 				if p.File.FileOp == FileDelete {
-					fmt.Println("!!!!!!!!!!! delete file:", p.File.TargetPath)
 					os.Remove(p.File.TargetPath)
 				}
 				if p.File.FileOp == DirectoryDelete {
-					fmt.Println("!!!!!!!!!!! delete folder:", p.File.TargetPath)
 					os.RemoveAll(p.File.TargetPath)
 				}
 			}
 		}
-
+		
+		fmt.Println("(Applying filesystem changes)")
+		fmt.Println("=========== Done ============")
+		fmt.Println("")
 		return nil
 	})
 
 	// 3. Copy the staging directory to the output directory
-	copyDir(tempDir, *outputDir, ignoreList)
+	if *zipOutput {
+		zipDir(tempDir, *outputDir)
+		fmt.Println("🎉 Created zip file: " + strings.TrimRight(*outputDir, "/") + ".zip")
+	} else {
+		copyDir(tempDir, *outputDir, ignoreList)
+		fmt.Println("🎉 Created a directory in " + strings.TrimRight(*outputDir, "/"))
+	}
 }
 
 func getIgnorePatterns(path string) []string {
@@ -219,4 +230,44 @@ func copyDir(src string, dst string, ignoreList []string) error {
 			return copyFile(path, dstPath)
 		}
 	})
+}
+
+func zipDir(src string, dst string) {
+	outFile, err := os.Create(dst + ".zip")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer outFile.Close()
+
+	zipWriter := zip.NewWriter(outFile)
+
+	filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+            return err
+        }
+
+        if info.IsDir() {
+            return nil
+        }
+
+        inFile, err := os.Open(path)
+        if err != nil {
+            return err
+        }
+        defer inFile.Close()
+
+        // Add file to zip archive using relative path as name
+		withSlashPath := strings.TrimRight(src, "/") + "/"
+		cleanPath := strings.Replace(path, withSlashPath, "", 1)
+        writer, err := zipWriter.Create(cleanPath)
+        if err != nil {
+            return err
+        }
+
+        // Write file content to zip archive using io.Copy method
+        io.Copy(writer, inFile)
+
+		return nil
+	})
+	zipWriter.Close()
 }
