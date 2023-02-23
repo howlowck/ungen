@@ -1,5 +1,8 @@
 name: Release Go project
 
+permissions:
+  packages: write
+
 on:
   push:
     tags:
@@ -16,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go 1.14
+      - name: Set up Go 1.19
         uses: actions/setup-go@v2
         with:
           go-version: 1.19
