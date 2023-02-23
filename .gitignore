@@ -2,3 +2,4 @@ ungen
 **/node_modules
 **/test
 test.zip
+dist/
