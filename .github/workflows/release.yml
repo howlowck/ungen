@@ -1,6 +1,7 @@
 name: Release Go project
 
 permissions:
+  contents: read
   packages: write
 
 on:
