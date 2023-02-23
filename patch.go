@@ -52,20 +52,21 @@ type FilePatch struct {
 }
 
 func (p *ContentPatch) Apply(lines []string) []string {
-	var oldLIneIndex int = p.OldLineNumber - 1
+	var oldLineIndex int = p.OldLineNumber - 1
 	if p.PatchType == PatchDelete {
-		return append(lines[:oldLIneIndex], lines[(oldLIneIndex+p.OldLineNumber):]...)
+		result := append(lines[:oldLineIndex], lines[(oldLineIndex+p.OldLineCount):]...)
+		return result
 	}
 	if p.PatchType == PatchReplace {
 		// Delete the line
-		temp := append(lines[:oldLIneIndex], lines[(oldLIneIndex+p.OldLineCount):]...)
+		temp := append(lines[:oldLineIndex], lines[(oldLineIndex+p.OldLineCount):]...)
 		// Insert new content
-		return append(temp[:oldLIneIndex], append(p.NewContent, temp[oldLIneIndex:]...)...)
+		return append(temp[:oldLineIndex], append(p.NewContent, temp[oldLineIndex:]...)...)
 	}
 	// TODO: add test for insert
 	if p.PatchType == PatchInsert {
 		// Insert new content
-		return append(lines[:oldLIneIndex], append(p.NewContent, lines[oldLIneIndex:]...)...)
+		return append(lines[:oldLineIndex], append(p.NewContent, lines[oldLineIndex:]...)...)
 	}
 	return lines
 }
