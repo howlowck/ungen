@@ -20,6 +20,11 @@ func TestLexer(t *testing.T) {
 		`// UNGEN:v1 replace "test" with var.appTest`,
 		`// UNGEN: delete folder`,
 		`// UNGEN: delete file`,
+		`// UNGEN: copy next 1 line to cb.keyVault`,
+		`// UNGEN: cut next 1 line to cb.keyVault`,
+		`// UNGEN: copy ln 10 to cb.keyVault`,
+		`// UNGEN: copy ln 10-12 to cb.keyVault`,
+		`// UNGEN: insert cb.keyVault`,
 	}
 
 	for _, c := range cases {

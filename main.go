@@ -40,7 +40,7 @@ func main() {
 	outputDir := flag.String("o", "", "OutputDirectory (Required)")
 	keepLine := flag.Bool("keep", false, "Keep the UNGEN line")
 	zipOutput := flag.Bool("zip", false, "Zip the output directory into a file")
-	
+
 	flag.Var(&vars, "var", "Set Variables (ex. -var foo=bar -var baz=qux)")
 
 	flag.Parse()
@@ -73,6 +73,53 @@ func main() {
 	}
 
 	fmt.Println("✅ Copied to Temp Dir:", tempDir)
+
+	// 2. Gather Stage (gather all the text into clipboard)
+	clipboard := make(map[string][]string)
+	filepath.Walk(tempDir, func(path string, info os.FileInfo, e error) error {
+		// Skip directories (since they will be scanned recursively)
+		if info.IsDir() {
+			return nil
+		}
+
+		// Read the file
+		body, err := os.ReadFile(path)
+		if err != nil {
+			// Handle error
+			log.Fatalf("unable to read file: %v", err)
+		}
+
+		lines := strings.Split(string(body), "\n")
+
+		for i, v := range lines {
+			if r.MatchString(v) {
+				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
+				context := Context{
+					lines:             lines,
+					vars:              vars,
+					path:              path,
+					keepLine:          *keepLine,
+					clipboard:         clipboard,
+					programLineNumber: i + 1,
+				}
+				program, _ := Parse(v)
+				program.Gather(&context)
+			}
+		}
+
+		return nil
+	})
+
+	fmt.Println("✅ Completed Gather Stage")
+
+	for i, v := range clipboard {
+		fmt.Println("Clipboard: " + i)
+		for _, vv := range v {
+			fmt.Println("├─ " + vv)
+		}
+	}
+
+	// 3. Eval and Patch Stage
 	filepath.Walk(tempDir, func(path string, info os.FileInfo, e error) error {
 		// Skip directories (since they will be scanned recursively)
 		if info.IsDir() {
@@ -88,16 +135,16 @@ func main() {
 
 		lines := strings.Split(string(body), "\n")
 		fileOps := []Patch{}
-		fmt.Println("Processing file: " + strings.Replace(path, tempDir + "/", "", 1))
-		// 2. Process in the staging directory
+		fmt.Println("Processing file for Eval and Patch: " + strings.Replace(path, tempDir+"/", "", 1))
 		for i, v := range lines {
 			if r.MatchString(v) {
 				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
-				context := EvalContext{
+				context := Context{
 					lines:             lines,
 					vars:              vars,
 					path:              path,
 					keepLine:          *keepLine,
+					clipboard:         clipboard,
 					programLineNumber: i + 1,
 				}
 				program, _ := Parse(v)
@@ -112,13 +159,12 @@ func main() {
 				}
 			}
 		}
-		
+
 		// Overwrite the file with new content
 		os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0777)
-		
-		
+
 		// TODO: it's doing extra work.. need to exit fast later
-		
+
 		for _, p := range fileOps {
 			if p.File != nil {
 				if p.File.FileOp == FileDelete {
@@ -129,7 +175,7 @@ func main() {
 				}
 			}
 		}
-		
+
 		fmt.Println("(Applying filesystem changes)")
 		fmt.Println("=========== Done ============")
 		fmt.Println("")
@@ -243,29 +289,29 @@ func zipDir(src string, dst string) {
 
 	filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-            return err
-        }
+			return err
+		}
 
-        if info.IsDir() {
-            return nil
-        }
+		if info.IsDir() {
+			return nil
+		}
 
-        inFile, err := os.Open(path)
-        if err != nil {
-            return err
-        }
-        defer inFile.Close()
+		inFile, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer inFile.Close()
 
-        // Add file to zip archive using relative path as name
+		// Add file to zip archive using relative path as name
 		withSlashPath := strings.TrimRight(src, "/") + "/"
 		cleanPath := strings.Replace(path, withSlashPath, "", 1)
-        writer, err := zipWriter.Create(cleanPath)
-        if err != nil {
-            return err
-        }
+		writer, err := zipWriter.Create(cleanPath)
+		if err != nil {
+			return err
+		}
 
-        // Write file content to zip archive using io.Copy method
-        io.Copy(writer, inFile)
+		// Write file content to zip archive using io.Copy method
+		io.Copy(writer, inFile)
 
 		return nil
 	})

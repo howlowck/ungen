@@ -8,7 +8,7 @@ import (
 )
 
 type EvalTestCase struct {
-	Context  EvalContext
+	Context  Context
 	Command  string
 	Expected []Patch
 }
@@ -40,6 +40,19 @@ STARTUP_MESSAGE=changeme
 
 // UNGEN: delete file
 // UNGEN: delete folder
+
+// UNGEN: copy next 1 line to cb.description
+DESCRIPTION=changeme
+
+// UNGEN: cut ln 23-24 to cb.description2
+DESCRIPTION1=changeme1
+DESCRIPTION2=changeme2
+
+// UNGEN: copy ln 1 to cb.description3
+
+// UNGEN: copy ln 5-7 to cb.description4
+
+// UNGEN: insert cb.description
 `
 
 	vars := make(map[string]string)
@@ -47,14 +60,17 @@ STARTUP_MESSAGE=changeme
 	vars["use_dev"] = "true"
 	vars["app_name"] = "test-app"
 
+	clipboard := make(map[string][]string)
+
 	lines := regexp.MustCompile("\r?\n").Split(fileContent, -1)
 
 	testCases := []EvalTestCase{
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 2,
 			},
@@ -69,10 +85,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 5,
 			},
@@ -87,10 +104,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 8,
 			},
@@ -105,10 +123,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 15,
 			},
@@ -123,10 +142,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 18,
 			},
@@ -141,10 +161,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 21,
 			},
@@ -159,10 +180,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              ".env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 24,
 			},
@@ -175,10 +197,11 @@ STARTUP_MESSAGE=changeme
 			}},
 		},
 		{
-			Context: EvalContext{
+			Context: Context{
 				lines:             lines,
 				path:              "test/.env.test",
 				vars:              vars,
+				clipboard:         clipboard,
 				keepLine:          true,
 				programLineNumber: 25,
 			},
@@ -187,6 +210,89 @@ STARTUP_MESSAGE=changeme
 				File: &FilePatch{
 					FileOp:     DirectoryDelete,
 					TargetPath: "test/",
+				},
+			}},
+		},
+		{
+			Context: Context{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				clipboard:         clipboard,
+				keepLine:          true,
+				programLineNumber: 27,
+			},
+			Command: lines[26], // copy
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 28,
+					OldLineCount:  0,
+					NewContent:    []string{},
+				},
+			}},
+		},
+		{
+			Context: Context{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				clipboard:         clipboard,
+				keepLine:          false,
+				programLineNumber: 30,
+			},
+			Command: lines[29], // cut
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 23,
+					OldLineCount:  2,
+					NewContent:    []string{},
+				},
+			}, {
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 30,
+					OldLineCount:  1,
+					NewContent:    []string{},
+				},
+			}},
+		},
+		{
+			Context: Context{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				clipboard:         clipboard,
+				keepLine:          false,
+				programLineNumber: 34,
+			},
+			Command: lines[33], // copy ln 1
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 34,
+					OldLineCount:  1,
+					NewContent:    []string{},
+				},
+			}},
+		},
+		{
+			Context: Context{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				clipboard:         clipboard,
+				keepLine:          false,
+				programLineNumber: 36,
+			},
+			Command: lines[35], // copy ln 5-7
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchDelete,
+					OldLineNumber: 36,
+					OldLineCount:  1,
+					NewContent:    []string{},
 				},
 			}},
 		},
