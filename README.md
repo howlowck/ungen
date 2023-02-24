@@ -45,11 +45,17 @@ The command above will replace all occurance of "World" with the kebab-case form
 ## Language Features:
 
 * `if / then / else` - conditionals. `else` is optional
+* `copy or cut` - "clipboard" operations
 * `"hello"` - string literals are in double quotes. This would be a value of a string `Hello`.
 * `var.<variable-name>` - variable values are prefix with `var.`
 * `camelCase(<value>)` - string functions are called like so, and will return a string value.
 
 ## Operations (more to come)
+
+### Copy or Cut into the Clipboard
+Specify the next x number of lines (`next 2 lines`) or line number (`ln 2`) or line number range (`ln 3-6`), then specify the name of the clipboard value (`cb.myText`)
+
+Example: `// UNGEN: copy next 1 line to cb.myText` it will store the next line into the `myText` cb value.
 
 ### String Replace
 Looks at the next line, and replace any string value to another value.
