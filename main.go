@@ -55,7 +55,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	r, _ := regexp.Compile(`\s?[\/]?[\/|#] UNGEN: (.*)\s?$`)
+	r, _ := regexp.Compile(`^\s?[\/]?[\/|#] UNGEN: (.*)\s?$`)
 
 	tempDir, err := ioutil.TempDir(os.TempDir(), "ungen-")
 
@@ -93,7 +93,6 @@ func main() {
 
 		for i, v := range lines {
 			if r.MatchString(v) {
-				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
 				context := Context{
 					lines:             lines,
 					vars:              vars,
@@ -102,7 +101,12 @@ func main() {
 					clipboard:         clipboard,
 					programLineNumber: i + 1,
 				}
-				program, _ := Parse(v)
+				program, error := Parse(v)
+				if error != nil {
+					fmt.Println("Error parsing line: " + v)
+					fmt.Println(error)
+					os.Exit(1)
+				}
 				program.Gather(&context)
 			}
 		}
@@ -187,6 +191,7 @@ func main() {
 		zipDir(tempDir, *outputDir)
 		fmt.Println("🎉 Created zip file: " + strings.TrimRight(*outputDir, "/") + ".zip")
 	} else {
+		// TODO: have a -clean flag to delete the output directory first
 		copyDir(tempDir, *outputDir, ignoreList)
 		fmt.Println("🎉 Created a directory in " + strings.TrimRight(*outputDir, "/"))
 	}
