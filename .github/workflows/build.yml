@@ -1,4 +1,4 @@
-name: Go
+name: Validate
 
 on:
   pull_request:
@@ -15,8 +15,8 @@ jobs:
         with:
           go-version: 1.19
 
-      - name: Build
-        run: go build -v ./...
-
       - name: Test
         run: go test -v ./...
+
+      - name: Build
+        run: go build -v ./...
