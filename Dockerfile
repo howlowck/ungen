@@ -1,6 +1,6 @@
-FROM alpine:3.17
+FROM debian:bullseye-slim
 
-RUN apk add zip
+RUN apt-get update && apt-get install -y zip
 
 COPY ./ungen /usr/local/bin/
 

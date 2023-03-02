@@ -16,25 +16,25 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 )
 
-type varMap map[string]string
-
-// Implement Set method for varMap
-func (m *varMap) Set(s string) error {
-	kv := strings.Split(s, "=")
-	if len(kv) == 2 {
-		(*m)[kv[0]] = kv[1]
+func (kvs *VarMap) Set(value string) error {
+	parts := strings.SplitN(value, "=", 2)
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid key-value pair: %q", value)
 	}
-	// TODO: maybe need to unset a value of there is 1 element
+	key := parts[0]
+	val := parts[1]
+	(*kvs)[key] = val
 	return nil
 }
 
-// Implement String method for kvMap
-func (m *varMap) String() string {
-	return fmt.Sprint(*m)
+func (vm *VarMap) String() string {
+	return fmt.Sprintf("%v", *vm)
 }
 
+type VarMap map[string]string
+
 func main() {
-	vars := make(varMap)
+	vars := make(VarMap)
 
 	inputDir := flag.String("i", "", "InputDirectory (Required)")
 	outputDir := flag.String("o", "", "OutputDirectory (Required)")
@@ -55,7 +55,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	r, _ := regexp.Compile(`^\s?[\/]?[\/|#] UNGEN: (.*)\s?$`)
+	r, _ := regexp.Compile(`^\s*[\/]?[\/|#] UNGEN: (.*)$`)
+	// mdR, _ := regexp.Compile(`^\s*\[\/\/\]: \# \"UNGEN: (.*)\"$`)
+	// lineR, _ := regexp.Compile(`^\s*\/\* UNGEN: (.*)? \*\/$`)
+
+	fmt.Println("vars:", vars)
 
 	tempDir, err := ioutil.TempDir(os.TempDir(), "ungen-")
 
