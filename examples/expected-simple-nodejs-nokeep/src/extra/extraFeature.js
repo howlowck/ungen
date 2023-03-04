@@ -1,4 +1,4 @@
-// UNGEN: if var.includeExtraFeature then insert "// hello"
+// hello
 
 export const extraFeature = () => {
     console.log("Extra feature");
