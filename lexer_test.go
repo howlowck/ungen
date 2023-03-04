@@ -25,6 +25,7 @@ func TestLexer(t *testing.T) {
 		`// UNGEN: copy ln 10 to cb.keyVault`,
 		`// UNGEN: copy ln 10-12 to cb.keyVault`,
 		`// UNGEN: insert cb.keyVault`,
+		`// UNGEN: if var.useTypescript == "yes" then insert cb.tsconfig else delete file`,
 	}
 
 	for _, c := range cases {

@@ -25,9 +25,15 @@ type Header struct {
 }
 
 type If struct {
-	Condition *Value     `"if" @@`
-	Then      *Operation `"then" @@`
-	Else      *Operation `("else" @@)?`
+	Condition *Conditional `"if" @@`
+	Then      *Operation   `"then" @@`
+	Else      *Operation   `("else" @@)?`
+}
+
+type Conditional struct {
+	Left  *Value  `@@`
+	Op    *string `( @("==" | "!=")`
+	Right *Value  `  @@ )?`
 }
 
 type Operation struct {
@@ -153,6 +159,7 @@ var (
 		{"COMMA", `,`},
 		{"STR", `'[^']*'|"[^"]*"`},
 		{"NUMRANGE", `\d+\-\d+`},
+		{"EQUALITY", `==|!=`},
 		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute|concat)\b`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},

@@ -53,6 +53,9 @@ DESCRIPTION2=changeme2
 // UNGEN: copy ln 5-7 to cb.description4
 
 // UNGEN: insert cb.description
+
+// UNGEN: if var.app_name == "test-app" then replace "false" with "true" else delete file
+TEST=false
 `
 
 	vars := make(map[string]string)
@@ -293,6 +296,25 @@ DESCRIPTION2=changeme2
 					OldLineNumber: 36,
 					OldLineCount:  1,
 					NewContent:    []string{},
+				},
+			}},
+		},
+		{
+			Context: Context{
+				lines:             lines,
+				path:              "test/.env.test",
+				vars:              vars,
+				clipboard:         clipboard,
+				keepLine:          false,
+				programLineNumber: 40,
+			},
+			Command: lines[39], // if var.app_name == "test-app" then replace "false" with "true" else delete file
+			Expected: []Patch{{
+				Content: &ContentPatch{
+					PatchType:     PatchReplace,
+					OldLineNumber: 40,
+					OldLineCount:  2,
+					NewContent:    []string{"TEST=true"},
 				},
 			}},
 		},

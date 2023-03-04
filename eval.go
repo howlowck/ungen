@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -69,6 +70,22 @@ func (p *Program) Evaluate(ctx Context) []Patch {
 	}
 
 	return result
+}
+
+func (c *Conditional) Evaluate(ctx Context, vars []string) []string {
+	left := c.Left.Evaluate(ctx, vars)
+	if c.Right != nil {
+		right := c.Right.Evaluate(ctx, vars)
+		isEqual := reflect.DeepEqual(left, right)
+		if isEqual && *c.Op == "==" {
+			return []string{"true"}
+		} else if !isEqual && *c.Op == "!=" {
+			return []string{"true"}
+		}
+		return []string{"false"}
+	}
+
+	return left
 }
 
 func (v *Operation) Evaluate(ctx Context) []Patch {
