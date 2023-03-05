@@ -16,16 +16,17 @@ type Context struct {
 	vars              map[string]string
 	clipboard         map[string][]string
 	keepLine          bool
+	isInjectedContent bool
 	programLineNumber int
 }
 
-func ProcessLineNumber(patch Patch, keepLine bool) Patch {
+func ProcessLineNumber(patch Patch, keepLine bool, isInjected bool) Patch {
 	result := patch
-
-	if !keepLine && patch.Content.PatchType == PatchInsert {
+	shouldKeepLine := keepLine && !isInjected
+	if !shouldKeepLine && patch.Content.PatchType == PatchInsert {
 		result.Content.OldLineNumber = patch.Content.OldLineNumber - 1
 		result.Content.OldLineCount = patch.Content.OldLineCount
-	} else if !keepLine {
+	} else if !shouldKeepLine {
 		result.Content.OldLineNumber = patch.Content.OldLineNumber - 1
 		result.Content.OldLineCount = patch.Content.OldLineCount + 1
 	}
@@ -62,7 +63,7 @@ func (p *Program) Evaluate(ctx Context) []Patch {
 					patch := Patch{
 						Content: &contentPatch,
 					}
-					processed := ProcessLineNumber(patch, ctx.keepLine)
+					processed := ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)
 					result = append(result, processed)
 				}
 			}
@@ -107,7 +108,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 				NewContent:    newContent,
 			}}
 
-		return []Patch{ProcessLineNumber(patch, ctx.keepLine)}
+		return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
 	}
 
 	if v.Copy != nil {
@@ -151,7 +152,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 					NewContent:    []string{},
 				}}
 
-			return []Patch{ProcessLineNumber(patch, ctx.keepLine)}
+			return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
 		}
 	}
 
@@ -165,7 +166,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 					NewContent:    []string{},
 				}}
 
-			return []Patch{ProcessLineNumber(patch, ctx.keepLine)}
+			return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
 		}
 
 		if v.Cut.From.LineNumRange != nil {
@@ -227,7 +228,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 				OldLineCount:  0,
 				NewContent:    value,
 			}}
-		return []Patch{ProcessLineNumber(patch, ctx.keepLine)}
+		return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
 	}
 
 	if v.Delete.File != nil {
@@ -264,7 +265,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 		Content: &contentPatch,
 	}
 
-	return []Patch{ProcessLineNumber(patch, ctx.keepLine)}
+	return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
 
 }
 

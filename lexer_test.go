@@ -26,6 +26,7 @@ func TestLexer(t *testing.T) {
 		`// UNGEN: copy ln 10-12 to cb.keyVault`,
 		`// UNGEN: insert cb.keyVault`,
 		`// UNGEN: if var.useTypescript == "yes" then insert cb.tsconfig else delete file`,
+		`// UNGEN: inject file:package.json on ln 5 'replace "simple-app" with var.appName'`,
 	}
 
 	for _, c := range cases {

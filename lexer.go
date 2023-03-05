@@ -14,10 +14,32 @@ type Program struct {
 }
 
 type Command struct {
-	Header *Header `@@`
+	Header        *Header    `@@`
+	Inject        *Inject    `( @@`
+	IfConditional *If        `| ( @@`
+	Operation     *Operation `  | @@ ))`
+}
 
-	IfConditional *If        `( @@`
-	Operation     *Operation ` | @@ )`
+type Inject struct {
+	FilePath   FilePath `"inject" @@ `
+	TargetLine int      `"on" "ln" @INT `
+	CmdString  string   `@CMDSTR`
+}
+
+type FilePath struct {
+	Name string `@@`
+}
+
+func (v *FilePath) Parse(lex *lexer.PeekingLexer) error {
+	tok := lex.Peek()
+	if !strings.HasPrefix(tok.Value, "file:") {
+		return participle.NextMatch
+	}
+	lex.Next()
+	*v = FilePath{
+		Name: tok.Value[5:],
+	}
+	return nil
 }
 
 type Header struct {
@@ -157,13 +179,15 @@ var (
 		{"whitespace", `\s+`},
 		{"PAREN", `(\(|\))`},
 		{"COMMA", `,`},
-		{"STR", `'[^']*'|"[^"]*"`},
+		{"CMDSTR", `'[^']*'`},
+		{"STR", `"[^"]*"`},
 		{"NUMRANGE", `\d+\-\d+`},
+		{"FILEPATH", `file:\S+`},
 		{"EQUALITY", `==|!=`},
 		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute|concat)\b`},
 		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
 		{"INT", `\d+`},
-		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|copy|cut|to|insert|next|ln)\b`},
+		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|copy|cut|to|insert|next|ln|inject|on)\b`},
 		{"UNIT", `(?i)\b(lines|line|file|folder)\b`},
 		{"VAR", `var\.\w+`},
 		{"CLIPB", `cb\.\w+`},
@@ -174,5 +198,6 @@ var (
 		participle.Lexer(basicLexer),
 		participle.CaseInsensitive("KEYWORD"),
 		participle.Unquote("STR"),
+		participle.Unquote("CMDSTR"),
 	)
 )

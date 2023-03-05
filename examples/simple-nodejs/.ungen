@@ -1,0 +1,5 @@
+// UNGEN: inject file:package.json on ln 2 'replace "simple-nodejs" with kebabCase(var.appName)'
+// UNGEN: inject file:package.json on ln 5 'if var.useTypescript == "true" then replace ".js" with ".ts"'
+// UNGEN: inject file:package-lock.json on ln 2 'replace "simple-nodejs" with kebabCase(var.appName)'
+// UNGEN: inject file:package-lock.json on ln 8 'replace "simple-nodejs" with kebabCase(var.appName)'
+// UNGEN: delete file

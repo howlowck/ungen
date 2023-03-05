@@ -78,7 +78,49 @@ func main() {
 
 	fmt.Println("✅ Copied to Temp Dir:", tempDir)
 
-	// 2. Gather Stage (gather all the text into clipboard)
+	// 2. Inject UNGEN Commands in files
+	injectionContent := make(map[string][]string) // filePath => lines
+	injectionHistory := make(map[string][]int)    // filePath => number of injections
+
+	filepath.Walk(tempDir, func(path string, info os.FileInfo, e error) error {
+		// Skip directories (since they will be scanned recursively)
+		if info.IsDir() {
+			return nil
+		}
+
+		if info.Name() == ".ungen" {
+			// Read the file
+			body, err := os.ReadFile(path)
+			if err != nil {
+				// Handle error
+				log.Fatalf("unable to read file: %v", err)
+			}
+
+			lines := strings.Split(string(body), "\n")
+			for _, line := range lines {
+				if r.MatchString(line) {
+					program, error := Parse(line)
+					if error != nil {
+						fmt.Println("Error parsing line: " + line)
+						fmt.Println(error)
+						os.Exit(1)
+					}
+					ctx := InjectionContext{
+						dotFilePath:      path,
+						injectionHistory: injectionHistory,
+						injectionContent: injectionContent,
+					}
+					program.Inject(&ctx)
+					injectionContent = ctx.injectionContent
+					injectionHistory = ctx.injectionHistory
+				}
+			}
+		}
+
+		return nil
+	})
+
+	// 3. Gather Stage (gather all the text into clipboard)
 	clipboard := make(map[string][]string)
 	filepath.Walk(tempDir, func(path string, info os.FileInfo, e error) error {
 		// Skip directories (since they will be scanned recursively)
@@ -133,15 +175,23 @@ func main() {
 		if info.IsDir() {
 			return nil
 		}
+		isInjected := false
+		// Read the file or if there is injectedContent, use that.
+		lines := func() []string {
+			lineContent := injectionContent[path]
+			if lineContent == nil {
+				content, err := os.ReadFile(path)
+				if err != nil {
+					// Handle error
+					log.Fatalf("unable to read file: %v", err)
+				}
+				return strings.Split(string(content), "\n")
+			} else {
+				isInjected = true
+				return lineContent
+			}
+		}()
 
-		// Read the file
-		body, err := os.ReadFile(path)
-		if err != nil {
-			// Handle error
-			log.Fatalf("unable to read file: %v", err)
-		}
-
-		lines := strings.Split(string(body), "\n")
 		fileOps := []Patch{}
 		fmt.Println("Processing file for Eval and Patch: " + strings.Replace(path, tempDir+"/", "", 1))
 		for i, v := range lines {
@@ -154,6 +204,7 @@ func main() {
 					keepLine:          *keepLine,
 					clipboard:         clipboard,
 					programLineNumber: i + 1,
+					isInjectedContent: isInjected,
 				}
 				program, _ := Parse(v)
 				patches := program.Evaluate(context)
