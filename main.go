@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/howlowck/ungen/internal"
 )
 
 func (kvs *VarMap) Set(value string) error {
@@ -99,20 +100,20 @@ func main() {
 			lines := strings.Split(string(body), "\n")
 			for _, line := range lines {
 				if r.MatchString(line) {
-					program, error := Parse(line)
+					program, error := internal.Parse(line)
 					if error != nil {
 						fmt.Println("Error parsing line: " + line)
 						fmt.Println(error)
 						os.Exit(1)
 					}
-					ctx := InjectionContext{
-						dotFilePath:      path,
-						injectionHistory: injectionHistory,
-						injectionContent: injectionContent,
+					ctx := internal.InjectionContext{
+						DotFilePath:      path,
+						InjectionHistory: injectionHistory,
+						InjectionContent: injectionContent,
 					}
 					program.Inject(&ctx)
-					injectionContent = ctx.injectionContent
-					injectionHistory = ctx.injectionHistory
+					injectionContent = ctx.InjectionContent
+					injectionHistory = ctx.InjectionHistory
 				}
 			}
 		}
@@ -139,15 +140,15 @@ func main() {
 
 		for i, v := range lines {
 			if r.MatchString(v) {
-				context := Context{
-					lines:             lines,
-					vars:              vars,
-					path:              path,
-					keepLine:          *keepLine,
-					clipboard:         clipboard,
-					programLineNumber: i + 1,
+				context := internal.Context{
+					Lines:             lines,
+					Vars:              vars,
+					Path:              path,
+					KeepLine:          *keepLine,
+					Clipboard:         clipboard,
+					ProgramLineNumber: i + 1,
 				}
-				program, error := Parse(v)
+				program, error := internal.Parse(v)
 				if error != nil {
 					fmt.Println("Error parsing line: " + v)
 					fmt.Println(error)
@@ -192,21 +193,21 @@ func main() {
 			}
 		}()
 
-		fileOps := []Patch{}
+		fileOps := []internal.Patch{}
 		fmt.Println("Processing file for Eval and Patch: " + strings.Replace(path, tempDir+"/", "", 1))
 		for i, v := range lines {
 			if r.MatchString(v) {
 				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
-				context := Context{
-					lines:             lines,
-					vars:              vars,
-					path:              path,
-					keepLine:          *keepLine,
-					clipboard:         clipboard,
-					programLineNumber: i + 1,
-					isInjectedContent: isInjected,
+				context := internal.Context{
+					Lines:             lines,
+					Vars:              vars,
+					Path:              path,
+					KeepLine:          *keepLine,
+					Clipboard:         clipboard,
+					ProgramLineNumber: i + 1,
+					IsInjectedContent: isInjected,
 				}
-				program, _ := Parse(v)
+				program, _ := internal.Parse(v)
 				patches := program.Evaluate(context)
 				for _, patch := range patches {
 					if patch.Content != nil {
@@ -226,10 +227,10 @@ func main() {
 
 		for _, p := range fileOps {
 			if p.File != nil {
-				if p.File.FileOp == FileDelete {
+				if p.File.FileOp == internal.FileDelete {
 					os.Remove(p.File.TargetPath)
 				}
-				if p.File.FileOp == DirectoryDelete {
+				if p.File.FileOp == internal.DirectoryDelete {
 					os.RemoveAll(p.File.TargetPath)
 				}
 			}

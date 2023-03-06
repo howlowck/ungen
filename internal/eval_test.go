@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -70,12 +70,12 @@ TEST=false
 	testCases := []EvalTestCase{
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 2,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 2,
 			},
 			Command: lines[1],
 			Expected: []Patch{{
@@ -89,12 +89,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 5,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 5,
 			},
 			Command: lines[4],
 			Expected: []Patch{{
@@ -108,12 +108,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 8,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 8,
 			},
 			Command: lines[7],
 			Expected: []Patch{{
@@ -127,12 +127,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 15,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 15,
 			},
 			Command: lines[14],
 			Expected: []Patch{{
@@ -146,12 +146,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 18,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 18,
 			},
 			Command: lines[17],
 			Expected: []Patch{{
@@ -165,12 +165,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 21,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 21,
 			},
 			Command: lines[20],
 			Expected: []Patch{{
@@ -184,12 +184,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              ".env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 24,
+				Lines:             lines,
+				Path:              ".env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 24,
 			},
 			Command: lines[23],
 			Expected: []Patch{{
@@ -201,12 +201,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 25,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 25,
 			},
 			Command: lines[24],
 			Expected: []Patch{{
@@ -218,12 +218,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          true,
-				programLineNumber: 27,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          true,
+				ProgramLineNumber: 27,
 			},
 			Command: lines[26], // copy
 			Expected: []Patch{{
@@ -237,12 +237,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          false,
-				programLineNumber: 30,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          false,
+				ProgramLineNumber: 30,
 			},
 			Command: lines[29], // cut
 			Expected: []Patch{{
@@ -263,12 +263,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          false,
-				programLineNumber: 34,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          false,
+				ProgramLineNumber: 34,
 			},
 			Command: lines[33], // copy ln 1
 			Expected: []Patch{{
@@ -282,12 +282,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          false,
-				programLineNumber: 36,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          false,
+				ProgramLineNumber: 36,
 			},
 			Command: lines[35], // copy ln 5-7
 			Expected: []Patch{{
@@ -301,12 +301,12 @@ TEST=false
 		},
 		{
 			Context: Context{
-				lines:             lines,
-				path:              "test/.env.test",
-				vars:              vars,
-				clipboard:         clipboard,
-				keepLine:          false,
-				programLineNumber: 40,
+				Lines:             lines,
+				Path:              "test/.env.test",
+				Vars:              vars,
+				Clipboard:         clipboard,
+				KeepLine:          false,
+				ProgramLineNumber: 40,
 			},
 			Command: lines[39], // if var.app_name == "test-app" then replace "false" with "true" else delete file
 			Expected: []Patch{{

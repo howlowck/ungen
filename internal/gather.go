@@ -1,4 +1,4 @@
-package main
+package internal
 
 import "fmt"
 
@@ -24,9 +24,9 @@ func (v *Operation) Gather(ctx *Context) error {
 		cbKey := v.Cut.To.Name
 		if v.Cut.From.NextLines != nil {
 			numOfLines := *v.Cut.From.NextLines
-			startLIndex := ctx.programLineNumber // the next line
-			tempLines := ctx.lines[startLIndex : startLIndex+numOfLines]
-			ctx.clipboard[cbKey] = tempLines
+			startLIndex := ctx.ProgramLineNumber // the next line
+			tempLines := ctx.Lines[startLIndex : startLIndex+numOfLines]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 
 		if v.Cut.From.LineNumRange != nil {
@@ -37,14 +37,14 @@ func (v *Operation) Gather(ctx *Context) error {
 			}
 			startLIndex := v.Cut.From.LineNumRange.FromLn - 1
 			numOfLines := count
-			tempLines := ctx.lines[startLIndex : startLIndex+numOfLines]
-			ctx.clipboard[cbKey] = tempLines
+			tempLines := ctx.Lines[startLIndex : startLIndex+numOfLines]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 
 		if v.Cut.From.LineNum != nil {
 			startLIndex := *v.Cut.From.LineNum - 1
-			tempLines := ctx.lines[startLIndex:*v.Cut.From.LineNum]
-			ctx.clipboard[cbKey] = tempLines
+			tempLines := ctx.Lines[startLIndex:*v.Cut.From.LineNum]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 	}
 
@@ -59,19 +59,19 @@ func (v *Operation) Gather(ctx *Context) error {
 			}
 			startLIndex := v.Copy.From.LineNumRange.FromLn - 1
 			numOfLines := count
-			tempLines := ctx.lines[startLIndex : startLIndex+numOfLines]
-			ctx.clipboard[cbKey] = tempLines
+			tempLines := ctx.Lines[startLIndex : startLIndex+numOfLines]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 		if v.Copy.From.LineNum != nil {
 			startLIndex := *v.Copy.From.LineNum - 1
-			tempLines := ctx.lines[startLIndex:1]
-			ctx.clipboard[cbKey] = tempLines
+			tempLines := ctx.Lines[startLIndex:1]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 		if v.Copy.From.NextLines != nil {
 			numOfLines := *v.Copy.From.NextLines
-			startLIndex := ctx.programLineNumber // the next line
-			tempLines := ctx.lines[startLIndex : startLIndex+numOfLines]
-			ctx.clipboard[cbKey] = tempLines
+			startLIndex := ctx.ProgramLineNumber // the next line
+			tempLines := ctx.Lines[startLIndex : startLIndex+numOfLines]
+			ctx.Clipboard[cbKey] = tempLines
 		}
 	}
 

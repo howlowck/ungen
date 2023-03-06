@@ -1,6 +1,7 @@
-package main
+package internal
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -172,6 +173,10 @@ func Parse(code string) (*Program, error) {
 		return nil, err
 	}
 	return program, nil
+}
+
+func Ebnf() {
+	fmt.Println(basicParser.String())
 }
 
 var (

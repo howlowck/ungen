@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -11,13 +11,13 @@ import (
 )
 
 type Context struct {
-	lines             []string
-	path              string
-	vars              map[string]string
-	clipboard         map[string][]string
-	keepLine          bool
-	isInjectedContent bool
-	programLineNumber int
+	Lines             []string
+	Path              string
+	Vars              map[string]string
+	Clipboard         map[string][]string
+	KeepLine          bool
+	IsInjectedContent bool
+	ProgramLineNumber int
 }
 
 func ProcessLineNumber(patch Patch, keepLine bool, isInjected bool) Patch {
@@ -53,7 +53,7 @@ func (p *Program) Evaluate(ctx Context) []Patch {
 				if c.IfConditional.Else != nil {
 					result = append(result, c.IfConditional.Else.Evaluate(ctx)...)
 				} else {
-					oldLineNumber := ctx.programLineNumber + 1 // the next line
+					oldLineNumber := ctx.ProgramLineNumber + 1 // the next line
 					contentPatch := ContentPatch{
 						PatchType:     PatchDelete,
 						OldLineNumber: oldLineNumber,
@@ -63,7 +63,7 @@ func (p *Program) Evaluate(ctx Context) []Patch {
 					patch := Patch{
 						Content: &contentPatch,
 					}
-					processed := ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)
+					processed := ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)
 					result = append(result, processed)
 				}
 			}
@@ -94,10 +94,10 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 		replaceFrom := v.Replace.From.String
 
 		replaceTo := v.Replace.To.Evaluate(ctx, []string{})
-		oldLineNumber := ctx.programLineNumber + 1 // the next line
+		oldLineNumber := ctx.ProgramLineNumber + 1 // the next line
 		oldLineCount := 1                          // default to 1
 
-		oldContent := strings.Join(ctx.lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
+		oldContent := strings.Join(ctx.Lines[oldLineNumber-1:oldLineNumber+oldLineCount-1], "\n")
 		re := regexp.MustCompile(*replaceFrom)
 		newContent := strings.Split(re.ReplaceAllString(oldContent, replaceTo[0]), "\n")
 		patch := Patch{
@@ -108,7 +108,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 				NewContent:    newContent,
 			}}
 
-		return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
+		return []Patch{ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)}
 	}
 
 	if v.Copy != nil {
@@ -118,11 +118,11 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 			if count < 1 {
 				fmt.Println("You cannot have zero or negative lines in a line range")
 			}
-			if !ctx.keepLine {
+			if !ctx.KeepLine {
 				return []Patch{{
 					Content: &ContentPatch{
 						PatchType:     PatchDelete,
-						OldLineNumber: ctx.programLineNumber,
+						OldLineNumber: ctx.ProgramLineNumber,
 						OldLineCount:  1,
 						NewContent:    []string{},
 					}},
@@ -131,11 +131,11 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 			return []Patch{}
 		}
 		if v.Copy.From.LineNum != nil {
-			if !ctx.keepLine {
+			if !ctx.KeepLine {
 				return []Patch{{
 					Content: &ContentPatch{
 						PatchType:     PatchDelete,
-						OldLineNumber: ctx.programLineNumber,
+						OldLineNumber: ctx.ProgramLineNumber,
 						OldLineCount:  1,
 						NewContent:    []string{},
 					}},
@@ -147,12 +147,12 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 			patch := Patch{
 				Content: &ContentPatch{
 					PatchType:     PatchDelete,
-					OldLineNumber: ctx.programLineNumber + 1,
+					OldLineNumber: ctx.ProgramLineNumber + 1,
 					OldLineCount:  0,
 					NewContent:    []string{},
 				}}
 
-			return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
+			return []Patch{ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)}
 		}
 	}
 
@@ -161,12 +161,12 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 			patch := Patch{
 				Content: &ContentPatch{
 					PatchType:     PatchDelete,
-					OldLineNumber: ctx.programLineNumber + 1,
+					OldLineNumber: ctx.ProgramLineNumber + 1,
 					OldLineCount:  0,
 					NewContent:    []string{},
 				}}
 
-			return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
+			return []Patch{ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)}
 		}
 
 		if v.Cut.From.LineNumRange != nil {
@@ -183,11 +183,11 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 					NewContent:    []string{},
 				}}
 			result := []Patch{patch}
-			if !ctx.keepLine {
+			if !ctx.KeepLine {
 				remoteCommandLine := Patch{
 					Content: &ContentPatch{
 						PatchType:     PatchDelete,
-						OldLineNumber: ctx.programLineNumber,
+						OldLineNumber: ctx.ProgramLineNumber,
 						OldLineCount:  1,
 						NewContent:    []string{},
 					}}
@@ -205,11 +205,11 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 					NewContent:    []string{},
 				}}
 			result := []Patch{patch}
-			if !ctx.keepLine {
+			if !ctx.KeepLine {
 				remoteCommandLine := Patch{
 					Content: &ContentPatch{
 						PatchType:     PatchDelete,
-						OldLineNumber: ctx.programLineNumber,
+						OldLineNumber: ctx.ProgramLineNumber,
 						OldLineCount:  1,
 						NewContent:    []string{},
 					}}
@@ -224,25 +224,25 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 		patch := Patch{
 			Content: &ContentPatch{
 				PatchType:     PatchReplace,
-				OldLineNumber: ctx.programLineNumber + 1,
+				OldLineNumber: ctx.ProgramLineNumber + 1,
 				OldLineCount:  0,
 				NewContent:    value,
 			}}
-		return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
+		return []Patch{ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)}
 	}
 
 	if v.Delete.File != nil {
 		patch := Patch{
 			File: &FilePatch{
 				FileOp:     FileDelete,
-				TargetPath: ctx.path,
+				TargetPath: ctx.Path,
 			},
 		}
 		return []Patch{patch}
 	}
 
 	if v.Delete.Directory != nil {
-		dir, _ := path.Split(ctx.path)
+		dir, _ := path.Split(ctx.Path)
 		patch := Patch{
 			File: &FilePatch{
 				FileOp:     DirectoryDelete,
@@ -253,7 +253,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 	}
 
 	// if not replace, then it's delete
-	oldLineNumber := ctx.programLineNumber + 1 // the next line
+	oldLineNumber := ctx.ProgramLineNumber + 1 // the next line
 	oldLineCount := v.Delete.NumOfLines
 	contentPatch := ContentPatch{
 		PatchType:     PatchDelete,
@@ -265,7 +265,7 @@ func (v *Operation) Evaluate(ctx Context) []Patch {
 		Content: &contentPatch,
 	}
 
-	return []Patch{ProcessLineNumber(patch, ctx.keepLine, ctx.isInjectedContent)}
+	return []Patch{ProcessLineNumber(patch, ctx.KeepLine, ctx.IsInjectedContent)}
 
 }
 
@@ -277,7 +277,7 @@ func (v *Value) Evaluate(ctx Context, inputs []string) []string {
 	if v.Variable != nil {
 		varTemp := *v.Variable
 		varName := varTemp.Name
-		strValue, ok := ctx.vars[varName]
+		strValue, ok := ctx.Vars[varName]
 		if ok {
 			return []string{strValue}
 		} else {
@@ -289,7 +289,7 @@ func (v *Value) Evaluate(ctx Context, inputs []string) []string {
 	if v.ClipBoard != nil {
 		cbTemp := *v.ClipBoard
 		cbName := cbTemp.Name
-		strValue, ok := ctx.clipboard[cbName]
+		strValue, ok := ctx.Clipboard[cbName]
 		if ok {
 			return strValue
 		} else {

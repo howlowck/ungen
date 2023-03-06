@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"os"
@@ -9,9 +9,9 @@ import (
 )
 
 type InjectionContext struct {
-	dotFilePath      string
-	injectionHistory map[string][]int
-	injectionContent map[string][]string
+	DotFilePath      string
+	InjectionHistory map[string][]int
+	InjectionContent map[string][]string
 }
 
 func (p *Program) Inject(ctx *InjectionContext) {
@@ -19,10 +19,10 @@ func (p *Program) Inject(ctx *InjectionContext) {
 		if c.Inject == nil {
 			continue
 		}
-		dirPath := filepath.Dir(ctx.dotFilePath)
+		dirPath := filepath.Dir(ctx.DotFilePath)
 		targetFilePath := path.Join(dirPath, c.Inject.FilePath.Name)
 		lines := func() []string {
-			lineContent := ctx.injectionContent[targetFilePath]
+			lineContent := ctx.InjectionContent[targetFilePath]
 			if lineContent == nil {
 				content, _ := os.ReadFile(targetFilePath)
 				return strings.Split(string(content), "\n")
@@ -32,7 +32,7 @@ func (p *Program) Inject(ctx *InjectionContext) {
 		}()
 		injectionLine := []string{"// UNGEN: " + c.Inject.CmdString}
 		injectionHistory := func() []int {
-			hist := ctx.injectionHistory[targetFilePath]
+			hist := ctx.InjectionHistory[targetFilePath]
 			if hist == nil {
 				return make([]int, 0)
 			} else {
@@ -42,9 +42,9 @@ func (p *Program) Inject(ctx *InjectionContext) {
 		targetLine := calculateTargetLine(injectionHistory, c.Inject.TargetLine)
 		oldLineIndex := targetLine - 1
 		newContent := append(lines[:oldLineIndex], append(injectionLine, lines[oldLineIndex:]...)...)
-		ctx.injectionContent[targetFilePath] = newContent
+		ctx.InjectionContent[targetFilePath] = newContent
 		// Need to append the original TargetLine
-		ctx.injectionHistory[targetFilePath] = sortAndInsertHistory(injectionHistory, c.Inject.TargetLine)
+		ctx.InjectionHistory[targetFilePath] = sortAndInsertHistory(injectionHistory, c.Inject.TargetLine)
 	}
 }
 func sortAndInsertHistory(injHist []int, origLn int) []int {

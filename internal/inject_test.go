@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"fmt"
@@ -16,16 +16,16 @@ func TestInject(t *testing.T) {
 	testCases := []InjectTestCase{
 		{
 			Context: InjectionContext{
-				dotFilePath:      "examples/simple-nodejs/.ungen",
-				injectionHistory: map[string][]int{},
-				injectionContent: map[string][]string{},
+				DotFilePath:      "../examples/simple-nodejs/.ungen",
+				InjectionHistory: map[string][]int{},
+				InjectionContent: map[string][]string{},
 			},
 			UngenCmd: `// UNGEN: inject file:package.json on ln 2 'replace "simple-nodejs" with kebabCase(var.appName)'`,
 			ExpectedHistory: map[string][]int{
-				"examples/simple-nodejs/package.json": {2},
+				"../examples/simple-nodejs/package.json": {2},
 			},
 			ExpectedContent: map[string][]string{
-				"examples/simple-nodejs/package.json": {
+				"../examples/simple-nodejs/package.json": {
 					`{`,
 					`// UNGEN: replace "simple-nodejs" with kebabCase(var.appName)`,
 					`  "name": "simple-nodejs",`,
@@ -48,12 +48,12 @@ func TestInject(t *testing.T) {
 		},
 		{
 			Context: InjectionContext{
-				dotFilePath: "examples/simple-nodejs/.ungen",
-				injectionHistory: map[string][]int{
-					"examples/simple-nodejs/package.json": {2},
+				DotFilePath: "../examples/simple-nodejs/.ungen",
+				InjectionHistory: map[string][]int{
+					"../examples/simple-nodejs/package.json": {2},
 				},
-				injectionContent: map[string][]string{
-					"examples/simple-nodejs/package.json": {
+				InjectionContent: map[string][]string{
+					"../examples/simple-nodejs/package.json": {
 						`{`,
 						`// UNGEN: replace "simple-nodejs" with kebabCase(var.appName)`,
 						`  "name": "simple-nodejs",`,
@@ -76,10 +76,10 @@ func TestInject(t *testing.T) {
 			},
 			UngenCmd: `// UNGEN: inject file:package.json on ln 5 'if var.useTypescript == "true" then replace ".js" with ".ts"'`,
 			ExpectedHistory: map[string][]int{
-				"examples/simple-nodejs/package.json": {2, 5},
+				"../examples/simple-nodejs/package.json": {2, 5},
 			},
 			ExpectedContent: map[string][]string{
-				"examples/simple-nodejs/package.json": {
+				"../examples/simple-nodejs/package.json": {
 					`{`,
 					`// UNGEN: replace "simple-nodejs" with kebabCase(var.appName)`,
 					`  "name": "simple-nodejs",`,
@@ -107,19 +107,21 @@ func TestInject(t *testing.T) {
 		cmd := c.UngenCmd
 		p, _ := Parse(cmd)
 		p.Inject(&c.Context)
-		actualContent := c.Context.injectionContent
-		actualHistory := c.Context.injectionHistory
+		actualContent := c.Context.InjectionContent
+		actualHistory := c.Context.InjectionHistory
 
 		eqHistory := compareMaps(actualHistory, c.ExpectedHistory)
-		eqContent := compareMaps(actualContent, c.ExpectedContent)
 		if !eqHistory {
-			fmt.Println(actualHistory, c.ExpectedHistory)
 			t.Errorf("Test case %d failed for different history", i)
+			break
 		}
+		fmt.Println("✔️ Same injection history for test case: ", i)
+		eqContent := compareMaps(actualContent, c.ExpectedContent)
 		if !eqContent {
-			fmt.Println(actualContent, c.ExpectedContent)
 			t.Errorf("Test case %d failed for different content", i)
+			break
 		}
+		fmt.Println("✔️ Same injection content for test case: ", i)
 		fmt.Println("✅", cmd)
 	}
 }
@@ -129,7 +131,7 @@ func compareMaps[T comparable](actual map[string][]T, expected map[string][]T) b
 	for k, v1 := range actual {
 		if v2, ok := expected[k]; ok {
 			if !slicesEqual(v1, v2) {
-				fmt.Printf("Different values for key %s:\n %v and\n %v\n", k, v1, v2)
+				fmt.Printf("⏰ Different values for key %s:\n %v and\n %v\n", k, v1, v2)
 				equal = false
 			}
 		} else {
