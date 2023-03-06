@@ -86,5 +86,13 @@ Example: `// UNGEN: delete folder`
 * `substitute`: subtitute("Hello World", "lo", "ping") -> `Helping World`
 * `concat`: concat("Hello ", "World", "!") -> `Hello World!`
 
+## Language Feature: Injection
+
+In some "languages", line comments are not allowed (like JSON) or not common (like Markdown), UnGen allows you to "inject" Ungen commands into those files before the parser processes the files. All you need to do is create a `.ungen` file in the same directory, and write your injection commands like so:
+
+`// UNGEN: inject file:<filename> on ln <line-number> '<ungen-command'`
+
+An example can be found in `examples/simple-nodejs/.ungen`
+
 ## Developer Notes
 * Run Test: `go test -timeout 30s -run ^TestLexer$ github.com/howlowck/ungen -v`
