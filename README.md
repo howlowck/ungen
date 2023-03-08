@@ -1,6 +1,6 @@
-# Ungen
+# UnGen
 
-Flipping a code generators on its head.
+Flipping code generators on its head.
 
 ## Design Principles
 
