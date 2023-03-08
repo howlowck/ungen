@@ -190,7 +190,7 @@ var (
 		{"FILEPATH", `file:\S+`},
 		{"EQUALITY", `==|!=`},
 		{"STRFUNC", `(kebabCase|snakeCase|camelCase|upperCase|lowerCase|substitute|concat)\b`},
-		{"HEADER", `(\/\/|#) UNGEN:(v1)? `},
+		{"HEADER", `\S*\s?UNGEN:(\S+)? `},
 		{"INT", `\d+`},
 		{"KEYWORD", `(?i)\b(if|then|else|replace|with|delete|copy|cut|to|insert|next|ln|inject|on)\b`},
 		{"UNIT", `(?i)\b(lines|line|file|folder)\b`},

@@ -86,7 +86,25 @@ Example: `// UNGEN: delete folder`
 * `substitute`: subtitute("Hello World", "lo", "ping") -> `Helping World`
 * `concat`: concat("Hello ", "World", "!") -> `Hello World!`
 
-## Language Feature: Injection
+
+## Languages Supported
+
+* Common Line Comment Languages (Go, Rust, C#, Java, PHP, JS/TS, C/C++, YAML, etc)
+    * `// UNGEN: replace "world" with var.appName`
+    * `# UNGEN: replace "world" with var.appName`
+* Block Line Comment Languages (CSS)
+    * `/* UNGEN: replace "world" with var.appName */`
+  > Note: The Block Line Comment needs to be in a single line
+* XML Line Comments (XML, HTML)
+    * `<!-- UNGEN: replace "world" with var.appName -->`
+* TSX/JSX
+    * `{/* UNGEN: replace "world" with var.appName */}`
+* Markdown
+    * `[//]: # 'UNGEN: replace "world" with var.appName'`
+
+(Create an issue to support other languages)
+
+### Language Feature: Injection (for non-commented languages)
 
 In some "languages", line comments are not allowed (like JSON) or not common (like Markdown), UnGen allows you to "inject" Ungen commands into those files before the parser processes the files. All you need to do is create a `.ungen` file in the same directory, and write your injection commands like so:
 

@@ -16,6 +16,7 @@ func TestMain(t *testing.T) {
 		"-o", "test",
 		"-var", "includeExtraFeature=true",
 		"-var", "appName=Haos Awesome App",
+		"-var", "theme=dark",
 		"-var", "useTypescript=false",
 	}
 	fmt.Printf("\nos args = %v\n", os.Args)
@@ -113,8 +114,10 @@ func compFileTree(actualPath, expectedPath string) bool {
 		log.Fatal(err)
 	}
 
-	if len(files1) != len(files2) {
-		fmt.Println("✖️ " + actualPath + " and " + expectedPath + " have different number of files")
+	actualNum := len(files1)
+	expectedNum := len(files2)
+	if actualNum != expectedNum {
+		fmt.Printf("✖️ %s and %s have different number of files: %d and %d respectively.\n", actualPath, expectedPath, actualNum, expectedNum)
 		return false
 	}
 

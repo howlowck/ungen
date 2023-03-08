@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -56,10 +55,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	r, _ := regexp.Compile(`^\s*[\/]?[\/|#] UNGEN: (.*)$`)
-	// mdR, _ := regexp.Compile(`^\s*\[\/\/\]: \# \"UNGEN: (.*)\"$`)
-	// lineR, _ := regexp.Compile(`^\s*\/\* UNGEN: (.*)? \*\/$`)
-
 	fmt.Println("vars:", vars)
 
 	tempDir, err := ioutil.TempDir(os.TempDir(), "ungen-")
@@ -99,8 +94,9 @@ func main() {
 
 			lines := strings.Split(string(body), "\n")
 			for _, line := range lines {
-				if r.MatchString(line) {
-					program, error := internal.Parse(line)
+				detected, extracted := internal.Detect(line)
+				if detected {
+					program, error := internal.Parse(extracted)
 					if error != nil {
 						fmt.Println("Error parsing line: " + line)
 						fmt.Println(error)
@@ -139,7 +135,8 @@ func main() {
 		lines := strings.Split(string(body), "\n")
 
 		for i, v := range lines {
-			if r.MatchString(v) {
+			detected, extracted := internal.Detect(v)
+			if detected {
 				context := internal.Context{
 					Lines:             lines,
 					Vars:              vars,
@@ -148,7 +145,7 @@ func main() {
 					Clipboard:         clipboard,
 					ProgramLineNumber: i + 1,
 				}
-				program, error := internal.Parse(v)
+				program, error := internal.Parse(extracted)
 				if error != nil {
 					fmt.Println("Error parsing line: " + v)
 					fmt.Println(error)
@@ -196,8 +193,9 @@ func main() {
 		fileOps := []internal.Patch{}
 		fmt.Println("Processing file for Eval and Patch: " + strings.Replace(path, tempDir+"/", "", 1))
 		for i, v := range lines {
-			if r.MatchString(v) {
-				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(v))
+			detected, extracted := internal.Detect(v)
+			if detected {
+				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(extracted))
 				context := internal.Context{
 					Lines:             lines,
 					Vars:              vars,
@@ -207,7 +205,7 @@ func main() {
 					ProgramLineNumber: i + 1,
 					IsInjectedContent: isInjected,
 				}
-				program, _ := internal.Parse(v)
+				program, _ := internal.Parse(extracted)
 				patches := program.Evaluate(context)
 				for _, patch := range patches {
 					if patch.Content != nil {

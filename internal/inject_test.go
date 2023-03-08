@@ -18,7 +18,26 @@ func TestInject(t *testing.T) {
 			Context: InjectionContext{
 				DotFilePath:      "../examples/simple-nodejs/.ungen",
 				InjectionHistory: map[string][]int{},
-				InjectionContent: map[string][]string{},
+				InjectionContent: map[string][]string{
+					"../examples/simple-nodejs/package.json": {
+						`{`,
+						`  "name": "simple-nodejs",`,
+						`  "version": "1.0.0",`,
+						`  "description": "",`,
+						`  "main": "index.js",`,
+						`  "scripts": {`,
+						`    "test": "echo \"Error: no test specified\" && exit 1"`,
+						`  },`,
+						`  "keywords": [],`,
+						`  "author": "",`,
+						`  "license": "ISC",`,
+						`  "dependencies": {`,
+						`    "express": "^4.18.2"`,
+						`  }`,
+						`}`,
+						``,
+					},
+				},
 			},
 			UngenCmd: `// UNGEN: inject file:package.json on ln 2 'replace "simple-nodejs" with kebabCase(var.appName)'`,
 			ExpectedHistory: map[string][]int{

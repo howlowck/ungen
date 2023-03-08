@@ -1,0 +1,10 @@
+.main {
+    /* UNGEN: if var.theme == "dark" then replace "#fff" with "#000" */
+    background: #fff;
+    /* UNGEN: if var.theme == "dark" then replace "#000" with "#fff" */
+    color: #000;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 1em;
+}
