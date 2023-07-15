@@ -95,7 +95,7 @@ func main() {
 			lines := strings.Split(string(body), "\n")
 			for _, line := range lines {
 				detected, extracted := internal.Detect(line)
-				if detected {
+				if detected == internal.DetectedDefault {
 					program, error := internal.Parse(extracted)
 					if error != nil {
 						fmt.Println("Error parsing line: " + line)
@@ -136,7 +136,7 @@ func main() {
 
 		for i, v := range lines {
 			detected, extracted := internal.Detect(v)
-			if detected {
+			if detected == internal.DetectedDefault {
 				context := internal.Context{
 					Lines:             lines,
 					Vars:              vars,
@@ -194,7 +194,7 @@ func main() {
 		fmt.Println("Processing file for Eval and Patch: " + strings.Replace(path, tempDir+"/", "", 1))
 		for i, v := range lines {
 			detected, extracted := internal.Detect(v)
-			if detected {
+			if detected == internal.DetectedDefault {
 				fmt.Println("├─ Ungen Found: " + strings.TrimSpace(extracted))
 				context := internal.Context{
 					Lines:             lines,
@@ -240,7 +240,7 @@ func main() {
 		return nil
 	})
 
-	// 3. Copy the staging directory to the output directory
+	// 4. Copy the staging directory to the output directory
 	if *zipOutput {
 		zipDir(tempDir, *outputDir)
 		fmt.Println("🎉 Created zip file: " + strings.TrimRight(*outputDir, "/") + ".zip")

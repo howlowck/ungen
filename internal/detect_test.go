@@ -7,7 +7,7 @@ import (
 
 type DetectTestCase struct {
 	Line              string
-	ExpectedDetected  bool
+	ExpectedDetected  DetectResult
 	ExpectedExtracted string
 }
 
@@ -15,32 +15,32 @@ func TestDetect(t *testing.T) {
 	testCases := []DetectTestCase{
 		{
 			Line:              "// UNGEN: copy ln 10 to cb.keyVault",
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: copy ln 10 to cb.keyVault",
 		},
 		{
 			Line:              "    /* UNGEN: copy ln 10 to cb.keyVault */ ",
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: copy ln 10 to cb.keyVault",
 		},
 		{
 			Line:              "	# UNGEN: copy ln 10 to cb.keyVault ",
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: copy ln 10 to cb.keyVault ",
 		},
 		{
 			Line:              "[//]: # 'UNGEN: replace \"Hello World\" with var.appName'",
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: replace \"Hello World\" with var.appName",
 		},
 		{
 			Line:              `  <!-- UNGEN: replace "Hello World" with var.appName -->`,
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: replace \"Hello World\" with var.appName",
 		},
 		{
 			Line:              `  {/* UNGEN: replace "Hello World" with var.appName */}`,
-			ExpectedDetected:  true,
+			ExpectedDetected:  1,
 			ExpectedExtracted: "UNGEN: replace \"Hello World\" with var.appName",
 		},
 	}

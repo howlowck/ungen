@@ -2,19 +2,27 @@ package internal
 
 import "regexp"
 
-func Detect(line string) (bool, string) {
-	pipeline := []*regexp.Regexp{
+type DetectResult int
+
+const (
+	NotDetected DetectResult = iota
+	DetectedDefault
+	DetectedGpt
+)
+
+func Detect(line string) (DetectResult, string) {
+	defaultPipeline := []*regexp.Regexp{
 		regexp.MustCompile(`^\s*[\/]?[\/|#] (UNGEN: .*)$`),
 		regexp.MustCompile(`^\s*\[\/\/\]: \# \'(UNGEN: .*)\'$`),
 		regexp.MustCompile(`^\s*\/\* (UNGEN: .*)? \*\/\s*$`),
 		regexp.MustCompile(`^\s*<!-- (UNGEN: .*)? -->\s*$`),
 		regexp.MustCompile(`^\s*\{\/\* (UNGEN: .*)? \*\/\}\s*$`),
 	}
-	for _, regex := range pipeline {
+	for _, regex := range defaultPipeline {
 		if regex.MatchString(line) {
 			submatch := regex.FindStringSubmatch(line)
-			return true, submatch[1]
+			return DetectedDefault, submatch[1]
 		}
 	}
-	return false, ""
+	return NotDetected, ""
 }

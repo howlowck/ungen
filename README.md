@@ -113,4 +113,4 @@ In some "languages", line comments are not allowed (like JSON) or not common (li
 An example can be found in `examples/simple-nodejs/.ungen`
 
 ## Developer Notes
-* Run Test: `go test -timeout 30s -run ^TestLexer$ github.com/howlowck/ungen -v`
+* Run Specific Test: `go test -timeout 30s -run ^TestLexer$ github.com/howlowck/ungen/internal -v`
