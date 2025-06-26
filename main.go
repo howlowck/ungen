@@ -216,6 +216,21 @@ func main() {
 					}
 				}
 			}
+			if detected == internal.DetectedGpt {
+				fmt.Println("├─ Ungen GPT Found: " + strings.TrimSpace(extracted))
+				fmt.Println("├─   calling OpenAI API for help")
+				// context := internal.Context{
+				// 	Lines:             lines,
+				// 	Vars:              vars,
+				// 	Path:              path,
+				// 	KeepLine:          *keepLine,
+				// 	Clipboard:         clipboard,
+				// 	ProgramLineNumber: i + 1,
+				// 	IsInjectedContent: isInjected,
+				// }
+				
+				// patches := program.OpenAIEval(context, extracted)
+			}
 		}
 
 		// Overwrite the file with new content
